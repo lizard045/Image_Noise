@@ -1,0 +1,2094 @@
+25-07-10 14:01:53.024 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 14:01:53.029 : Random seed: 2973
+25-07-10 14:04:35.486 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 14:04:35.490 : Random seed: 2248
+25-07-10 14:04:35.698 : Number of train images: 60, iters: 1
+25-07-10 14:11:45.052 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 14:11:45.057 : Random seed: 5684
+25-07-10 14:11:45.095 : Number of train images: 72, iters: 2
+25-07-10 14:12:26.565 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 14:12:26.571 : Random seed: 7912
+25-07-10 14:12:26.610 : Number of train images: 72, iters: 2
+25-07-10 14:27:35.324 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 14:27:35.328 : Random seed: 606
+25-07-10 14:27:35.374 : Number of train images: 72, iters: 2
+25-07-10 14:38:48.522 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 14:38:48.526 : Random seed: 7234
+25-07-10 14:38:48.579 : Number of train images: 72, iters: 2
+25-07-10 15:01:48.950 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 15:01:48.954 : Random seed: 6058
+25-07-10 15:01:48.983 : Number of train images: 72, iters: 2
+25-07-10 15:01:50.370 : 
+Networks name: DnCNN
+Params number: 557057
+Net structure:
+DnCNN(
+  (model): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (4): ReLU(inplace=True)
+    (5): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (7): ReLU(inplace=True)
+    (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (10): ReLU(inplace=True)
+    (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (12): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (13): ReLU(inplace=True)
+    (14): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (16): ReLU(inplace=True)
+    (17): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (19): ReLU(inplace=True)
+    (20): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (21): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (22): ReLU(inplace=True)
+    (23): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (24): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (25): ReLU(inplace=True)
+    (26): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (28): ReLU(inplace=True)
+    (29): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (30): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (31): ReLU(inplace=True)
+    (32): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (33): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (34): ReLU(inplace=True)
+    (35): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (36): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (37): ReLU(inplace=True)
+    (38): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (39): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (40): ReLU(inplace=True)
+    (41): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (42): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (43): ReLU(inplace=True)
+    (44): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (45): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (46): ReLU(inplace=True)
+    (47): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+)
+
+25-07-10 15:01:51.162 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ |  0.003 | -0.085 |  0.069 |  0.025 | torch.Size([64, 1, 3, 3]) || model.0.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.0.bias
+ | -0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.2.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.2.bias
+ |  0.535 |  0.146 |  0.994 |  0.265 | torch.Size([64]) || model.3.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.3.running_var
+ | -0.000 | -0.039 |  0.036 |  0.008 | torch.Size([64, 64, 3, 3]) || model.5.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.5.bias
+ |  0.520 |  0.134 |  0.986 |  0.257 | torch.Size([64]) || model.6.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.6.running_var
+ |  0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.8.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.8.bias
+ |  0.547 |  0.134 |  0.994 |  0.270 | torch.Size([64]) || model.9.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.9.running_var
+ |  0.000 | -0.032 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.11.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.11.bias
+ |  0.531 |  0.140 |  0.993 |  0.262 | torch.Size([64]) || model.12.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.12.running_var
+ |  0.000 | -0.038 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.14.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.14.bias
+ |  0.578 |  0.125 |  0.990 |  0.270 | torch.Size([64]) || model.15.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.15.running_var
+ |  0.000 | -0.037 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.17.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.17.bias
+ |  0.505 |  0.103 |  0.999 |  0.273 | torch.Size([64]) || model.18.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.18.running_var
+ |  0.000 | -0.035 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.20.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.20.bias
+ |  0.589 |  0.104 |  0.987 |  0.256 | torch.Size([64]) || model.21.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.21.running_var
+ |  0.000 | -0.033 |  0.038 |  0.008 | torch.Size([64, 64, 3, 3]) || model.23.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.23.bias
+ |  0.559 |  0.101 |  0.987 |  0.252 | torch.Size([64]) || model.24.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.24.running_var
+ | -0.000 | -0.038 |  0.040 |  0.008 | torch.Size([64, 64, 3, 3]) || model.26.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.26.bias
+ |  0.518 |  0.110 |  0.997 |  0.252 | torch.Size([64]) || model.27.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.27.running_var
+ |  0.000 | -0.035 |  0.036 |  0.008 | torch.Size([64, 64, 3, 3]) || model.29.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.29.bias
+ |  0.535 |  0.109 |  0.991 |  0.273 | torch.Size([64]) || model.30.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.30.running_var
+ |  0.000 | -0.032 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.32.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.32.bias
+ |  0.549 |  0.144 |  0.980 |  0.233 | torch.Size([64]) || model.33.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.33.running_var
+ | -0.000 | -0.035 |  0.038 |  0.008 | torch.Size([64, 64, 3, 3]) || model.35.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.35.bias
+ |  0.624 |  0.146 |  0.998 |  0.265 | torch.Size([64]) || model.36.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.36.running_var
+ | -0.000 | -0.036 |  0.030 |  0.008 | torch.Size([64, 64, 3, 3]) || model.38.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.38.bias
+ |  0.563 |  0.144 |  0.999 |  0.244 | torch.Size([64]) || model.39.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.39.running_var
+ | -0.000 | -0.033 |  0.031 |  0.008 | torch.Size([64, 64, 3, 3]) || model.41.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.41.bias
+ |  0.608 |  0.103 |  0.996 |  0.278 | torch.Size([64]) || model.42.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.42.running_var
+ | -0.000 | -0.032 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.44.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.44.bias
+ |  0.530 |  0.107 |  0.980 |  0.261 | torch.Size([64]) || model.45.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.45.running_var
+ | -0.000 | -0.029 |  0.029 |  0.008 | torch.Size([1, 64, 3, 3]) || model.47.weight
+ |  0.000 |  0.000 |  0.000 |    nan | torch.Size([1]) || model.47.bias
+
+25-07-10 15:10:02.339 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 15:10:02.345 : Random seed: 5472
+25-07-10 15:10:02.372 : Number of train images: 60, iters: 1
+25-07-10 15:10:04.008 : 
+Networks name: DnCNN
+Params number: 557057
+Net structure:
+DnCNN(
+  (model): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (4): ReLU(inplace=True)
+    (5): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (7): ReLU(inplace=True)
+    (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (10): ReLU(inplace=True)
+    (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (12): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (13): ReLU(inplace=True)
+    (14): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (16): ReLU(inplace=True)
+    (17): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (19): ReLU(inplace=True)
+    (20): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (21): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (22): ReLU(inplace=True)
+    (23): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (24): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (25): ReLU(inplace=True)
+    (26): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (28): ReLU(inplace=True)
+    (29): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (30): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (31): ReLU(inplace=True)
+    (32): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (33): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (34): ReLU(inplace=True)
+    (35): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (36): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (37): ReLU(inplace=True)
+    (38): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (39): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (40): ReLU(inplace=True)
+    (41): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (42): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (43): ReLU(inplace=True)
+    (44): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (45): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (46): ReLU(inplace=True)
+    (47): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+)
+
+25-07-10 15:10:06.487 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ | -0.000 | -0.074 |  0.072 |  0.025 | torch.Size([64, 1, 3, 3]) || model.0.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.0.bias
+ |  0.000 | -0.036 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.2.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.2.bias
+ |  0.534 |  0.107 |  0.996 |  0.273 | torch.Size([64]) || model.3.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.3.running_var
+ |  0.000 | -0.031 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.5.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.5.bias
+ |  0.507 |  0.102 |  0.953 |  0.239 | torch.Size([64]) || model.6.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.6.running_var
+ | -0.000 | -0.036 |  0.036 |  0.008 | torch.Size([64, 64, 3, 3]) || model.8.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.8.bias
+ |  0.511 |  0.114 |  0.979 |  0.256 | torch.Size([64]) || model.9.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.9.running_var
+ |  0.000 | -0.032 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.11.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.11.bias
+ |  0.558 |  0.112 |  0.991 |  0.274 | torch.Size([64]) || model.12.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.12.running_var
+ |  0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.14.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.14.bias
+ |  0.551 |  0.107 |  0.992 |  0.285 | torch.Size([64]) || model.15.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.15.running_var
+ |  0.000 | -0.032 |  0.037 |  0.008 | torch.Size([64, 64, 3, 3]) || model.17.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.17.bias
+ |  0.508 |  0.104 |  0.989 |  0.254 | torch.Size([64]) || model.18.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.18.running_var
+ | -0.000 | -0.032 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.20.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.20.bias
+ |  0.546 |  0.108 |  0.979 |  0.249 | torch.Size([64]) || model.21.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.21.running_var
+ |  0.000 | -0.036 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.23.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.23.bias
+ |  0.563 |  0.101 |  0.991 |  0.263 | torch.Size([64]) || model.24.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.24.running_var
+ |  0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.26.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.26.bias
+ |  0.533 |  0.103 |  0.981 |  0.245 | torch.Size([64]) || model.27.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.27.running_var
+ | -0.000 | -0.033 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.29.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.29.bias
+ |  0.571 |  0.185 |  0.983 |  0.249 | torch.Size([64]) || model.30.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.30.running_var
+ |  0.000 | -0.033 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.32.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.32.bias
+ |  0.611 |  0.112 |  0.997 |  0.278 | torch.Size([64]) || model.33.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.33.running_var
+ |  0.000 | -0.035 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.35.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.35.bias
+ |  0.554 |  0.102 |  0.993 |  0.266 | torch.Size([64]) || model.36.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.36.running_var
+ |  0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.38.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.38.bias
+ |  0.541 |  0.105 |  0.997 |  0.293 | torch.Size([64]) || model.39.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.39.running_var
+ | -0.000 | -0.035 |  0.037 |  0.008 | torch.Size([64, 64, 3, 3]) || model.41.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.41.bias
+ |  0.524 |  0.101 |  0.996 |  0.280 | torch.Size([64]) || model.42.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.42.running_var
+ | -0.000 | -0.033 |  0.036 |  0.008 | torch.Size([64, 64, 3, 3]) || model.44.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.44.bias
+ |  0.520 |  0.113 |  0.992 |  0.287 | torch.Size([64]) || model.45.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.45.running_var
+ | -0.000 | -0.026 |  0.025 |  0.008 | torch.Size([1, 64, 3, 3]) || model.47.weight
+ |  0.000 |  0.000 |  0.000 |    nan | torch.Size([1]) || model.47.bias
+
+25-07-10 15:18:15.880 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 400000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 5000
+    checkpoint_save: 5000
+    checkpoint_print: 200
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 15:18:15.884 : Random seed: 2733
+25-07-10 15:18:15.898 : Number of train images: 60, iters: 1
+25-07-10 15:18:16.549 : 
+Networks name: DnCNN
+Params number: 557057
+Net structure:
+DnCNN(
+  (model): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (4): ReLU(inplace=True)
+    (5): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (7): ReLU(inplace=True)
+    (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (10): ReLU(inplace=True)
+    (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (12): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (13): ReLU(inplace=True)
+    (14): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (16): ReLU(inplace=True)
+    (17): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (19): ReLU(inplace=True)
+    (20): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (21): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (22): ReLU(inplace=True)
+    (23): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (24): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (25): ReLU(inplace=True)
+    (26): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (28): ReLU(inplace=True)
+    (29): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (30): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (31): ReLU(inplace=True)
+    (32): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (33): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (34): ReLU(inplace=True)
+    (35): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (36): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (37): ReLU(inplace=True)
+    (38): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (39): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (40): ReLU(inplace=True)
+    (41): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (42): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (43): ReLU(inplace=True)
+    (44): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (45): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (46): ReLU(inplace=True)
+    (47): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+)
+
+25-07-10 15:18:17.298 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ |  0.001 | -0.070 |  0.091 |  0.025 | torch.Size([64, 1, 3, 3]) || model.0.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.0.bias
+ |  0.000 | -0.033 |  0.039 |  0.008 | torch.Size([64, 64, 3, 3]) || model.2.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.2.bias
+ |  0.503 |  0.129 |  0.958 |  0.237 | torch.Size([64]) || model.3.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.3.running_var
+ |  0.000 | -0.033 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.5.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.5.bias
+ |  0.588 |  0.106 |  0.988 |  0.259 | torch.Size([64]) || model.6.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.6.running_var
+ | -0.000 | -0.032 |  0.039 |  0.008 | torch.Size([64, 64, 3, 3]) || model.8.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.8.bias
+ |  0.544 |  0.121 |  0.995 |  0.245 | torch.Size([64]) || model.9.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.9.running_var
+ | -0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.11.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.11.bias
+ |  0.488 |  0.101 |  0.962 |  0.251 | torch.Size([64]) || model.12.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.12.running_var
+ | -0.000 | -0.032 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.14.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.14.bias
+ |  0.593 |  0.101 |  0.988 |  0.257 | torch.Size([64]) || model.15.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.15.running_var
+ | -0.000 | -0.033 |  0.031 |  0.008 | torch.Size([64, 64, 3, 3]) || model.17.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.17.bias
+ |  0.517 |  0.122 |  0.975 |  0.244 | torch.Size([64]) || model.18.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.18.running_var
+ | -0.000 | -0.032 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.20.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.20.bias
+ |  0.510 |  0.104 |  0.993 |  0.260 | torch.Size([64]) || model.21.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.21.running_var
+ | -0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.23.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.23.bias
+ |  0.541 |  0.103 |  0.999 |  0.251 | torch.Size([64]) || model.24.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.24.running_var
+ | -0.000 | -0.030 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.26.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.26.bias
+ |  0.586 |  0.104 |  0.998 |  0.292 | torch.Size([64]) || model.27.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.27.running_var
+ |  0.000 | -0.033 |  0.031 |  0.008 | torch.Size([64, 64, 3, 3]) || model.29.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.29.bias
+ |  0.526 |  0.108 |  0.984 |  0.257 | torch.Size([64]) || model.30.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.30.running_var
+ |  0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.32.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.32.bias
+ |  0.505 |  0.112 |  0.955 |  0.220 | torch.Size([64]) || model.33.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.33.running_var
+ | -0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.35.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.35.bias
+ |  0.557 |  0.112 |  0.995 |  0.260 | torch.Size([64]) || model.36.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.36.running_var
+ |  0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.38.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.38.bias
+ |  0.566 |  0.114 |  0.979 |  0.273 | torch.Size([64]) || model.39.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.39.running_var
+ |  0.000 | -0.040 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.41.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.41.bias
+ |  0.637 |  0.119 |  0.997 |  0.282 | torch.Size([64]) || model.42.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.42.running_var
+ |  0.000 | -0.039 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.44.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.44.bias
+ |  0.557 |  0.103 |  0.994 |  0.247 | torch.Size([64]) || model.45.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.45.running_var
+ | -0.000 | -0.028 |  0.027 |  0.008 | torch.Size([1, 64, 3, 3]) || model.47.weight
+ |  0.000 |  0.000 |  0.000 |    nan | torch.Size([1]) || model.47.bias
+
+25-07-10 15:27:32.576 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 2000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 4
+      dataloader_batch_size: 16
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [200000, 400000, 600000, 800000, 1000000, 2000000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 100
+    checkpoint_save: 100
+    checkpoint_print: 10
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 15:27:32.579 : Random seed: 5824
+25-07-10 15:27:32.594 : Number of train images: 60, iters: 4
+25-07-10 15:27:33.244 : 
+Networks name: DnCNN
+Params number: 557057
+Net structure:
+DnCNN(
+  (model): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (4): ReLU(inplace=True)
+    (5): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (7): ReLU(inplace=True)
+    (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (10): ReLU(inplace=True)
+    (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (12): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (13): ReLU(inplace=True)
+    (14): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (16): ReLU(inplace=True)
+    (17): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (19): ReLU(inplace=True)
+    (20): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (21): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (22): ReLU(inplace=True)
+    (23): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (24): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (25): ReLU(inplace=True)
+    (26): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (28): ReLU(inplace=True)
+    (29): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (30): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (31): ReLU(inplace=True)
+    (32): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (33): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (34): ReLU(inplace=True)
+    (35): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (36): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (37): ReLU(inplace=True)
+    (38): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (39): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (40): ReLU(inplace=True)
+    (41): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (42): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (43): ReLU(inplace=True)
+    (44): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (45): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (46): ReLU(inplace=True)
+    (47): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+)
+
+25-07-10 15:27:34.047 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ | -0.001 | -0.075 |  0.086 |  0.025 | torch.Size([64, 1, 3, 3]) || model.0.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.0.bias
+ | -0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.2.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.2.bias
+ |  0.508 |  0.116 |  0.982 |  0.243 | torch.Size([64]) || model.3.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.3.running_var
+ | -0.000 | -0.033 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.5.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.5.bias
+ |  0.577 |  0.105 |  0.989 |  0.281 | torch.Size([64]) || model.6.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.6.running_var
+ | -0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.8.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.8.bias
+ |  0.589 |  0.147 |  0.969 |  0.253 | torch.Size([64]) || model.9.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.9.running_var
+ | -0.000 | -0.033 |  0.038 |  0.008 | torch.Size([64, 64, 3, 3]) || model.11.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.11.bias
+ |  0.589 |  0.126 |  0.999 |  0.241 | torch.Size([64]) || model.12.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.12.running_var
+ | -0.000 | -0.037 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.14.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.14.bias
+ |  0.526 |  0.102 |  0.982 |  0.268 | torch.Size([64]) || model.15.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.15.running_var
+ | -0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.17.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.17.bias
+ |  0.569 |  0.119 |  0.960 |  0.259 | torch.Size([64]) || model.18.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.18.running_var
+ | -0.000 | -0.040 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.20.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.20.bias
+ |  0.588 |  0.153 |  0.981 |  0.251 | torch.Size([64]) || model.21.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.21.running_var
+ |  0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.23.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.23.bias
+ |  0.535 |  0.103 |  0.996 |  0.277 | torch.Size([64]) || model.24.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.24.running_var
+ | -0.000 | -0.035 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.26.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.26.bias
+ |  0.552 |  0.111 |  0.995 |  0.257 | torch.Size([64]) || model.27.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.27.running_var
+ |  0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.29.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.29.bias
+ |  0.551 |  0.104 |  0.993 |  0.251 | torch.Size([64]) || model.30.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.30.running_var
+ |  0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.32.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.32.bias
+ |  0.568 |  0.101 |  0.994 |  0.269 | torch.Size([64]) || model.33.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.33.running_var
+ | -0.000 | -0.033 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.35.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.35.bias
+ |  0.510 |  0.101 |  0.998 |  0.239 | torch.Size([64]) || model.36.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.36.running_var
+ | -0.000 | -0.033 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.38.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.38.bias
+ |  0.567 |  0.110 |  0.989 |  0.279 | torch.Size([64]) || model.39.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.39.running_var
+ |  0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.41.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.41.bias
+ |  0.544 |  0.115 |  0.997 |  0.272 | torch.Size([64]) || model.42.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.42.running_var
+ | -0.000 | -0.032 |  0.036 |  0.008 | torch.Size([64, 64, 3, 3]) || model.44.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.44.bias
+ |  0.548 |  0.108 |  0.960 |  0.263 | torch.Size([64]) || model.45.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.45.running_var
+ | -0.000 | -0.027 |  0.028 |  0.008 | torch.Size([1, 64, 3, 3]) || model.47.weight
+ |  0.000 |  0.000 |  0.000 |    nan | torch.Size([1]) || model.47.bias
+
+25-07-10 15:28:14.889 : <epoch:  3, iter:      10, lr:1.000e-04> G_loss: 7.619e-02 
+25-07-10 15:28:42.856 : <epoch:  6, iter:      20, lr:1.000e-04> G_loss: 6.300e-02 
+25-07-10 15:29:11.070 : <epoch:  9, iter:      30, lr:1.000e-04> G_loss: 4.932e-02 
+25-07-10 15:30:28.003 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 2000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 4
+      dataloader_batch_size: 16
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [500, 1000, 2000, 5000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 100
+    checkpoint_save: 100
+    checkpoint_print: 10
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 15:30:28.008 : Random seed: 5711
+25-07-10 15:30:28.021 : Number of train images: 60, iters: 4
+25-07-10 15:30:28.655 : 
+Networks name: DnCNN
+Params number: 557057
+Net structure:
+DnCNN(
+  (model): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (4): ReLU(inplace=True)
+    (5): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (7): ReLU(inplace=True)
+    (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (10): ReLU(inplace=True)
+    (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (12): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (13): ReLU(inplace=True)
+    (14): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (16): ReLU(inplace=True)
+    (17): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (19): ReLU(inplace=True)
+    (20): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (21): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (22): ReLU(inplace=True)
+    (23): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (24): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (25): ReLU(inplace=True)
+    (26): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (28): ReLU(inplace=True)
+    (29): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (30): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (31): ReLU(inplace=True)
+    (32): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (33): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (34): ReLU(inplace=True)
+    (35): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (36): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (37): ReLU(inplace=True)
+    (38): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (39): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (40): ReLU(inplace=True)
+    (41): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (42): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (43): ReLU(inplace=True)
+    (44): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (45): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (46): ReLU(inplace=True)
+    (47): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+)
+
+25-07-10 15:30:29.452 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ | -0.001 | -0.065 |  0.076 |  0.025 | torch.Size([64, 1, 3, 3]) || model.0.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.0.bias
+ |  0.000 | -0.034 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.2.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.2.bias
+ |  0.556 |  0.107 |  0.993 |  0.260 | torch.Size([64]) || model.3.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.3.running_var
+ | -0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.5.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.5.bias
+ |  0.545 |  0.104 |  0.978 |  0.256 | torch.Size([64]) || model.6.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.6.running_var
+ | -0.000 | -0.033 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.8.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.8.bias
+ |  0.527 |  0.118 |  0.971 |  0.250 | torch.Size([64]) || model.9.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.9.running_var
+ | -0.000 | -0.041 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.11.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.11.bias
+ |  0.574 |  0.118 |  0.996 |  0.290 | torch.Size([64]) || model.12.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.12.running_var
+ |  0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.14.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.14.bias
+ |  0.500 |  0.108 |  1.000 |  0.251 | torch.Size([64]) || model.15.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.15.running_var
+ |  0.000 | -0.034 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.17.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.17.bias
+ |  0.567 |  0.111 |  0.993 |  0.272 | torch.Size([64]) || model.18.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.18.running_var
+ |  0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.20.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.20.bias
+ |  0.513 |  0.113 |  0.993 |  0.267 | torch.Size([64]) || model.21.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.21.running_var
+ | -0.000 | -0.033 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.23.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.23.bias
+ |  0.612 |  0.109 |  0.999 |  0.252 | torch.Size([64]) || model.24.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.24.running_var
+ | -0.000 | -0.032 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.26.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.26.bias
+ |  0.533 |  0.104 |  0.968 |  0.252 | torch.Size([64]) || model.27.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.27.running_var
+ | -0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.29.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.29.bias
+ |  0.555 |  0.102 |  0.977 |  0.259 | torch.Size([64]) || model.30.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.30.running_var
+ | -0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.32.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.32.bias
+ |  0.520 |  0.118 |  0.963 |  0.275 | torch.Size([64]) || model.33.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.33.running_var
+ |  0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.35.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.35.bias
+ |  0.557 |  0.117 |  0.999 |  0.274 | torch.Size([64]) || model.36.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.36.running_var
+ | -0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.38.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.38.bias
+ |  0.577 |  0.137 |  0.997 |  0.261 | torch.Size([64]) || model.39.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.39.running_var
+ |  0.000 | -0.035 |  0.039 |  0.008 | torch.Size([64, 64, 3, 3]) || model.41.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.41.bias
+ |  0.580 |  0.118 |  0.988 |  0.251 | torch.Size([64]) || model.42.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.42.running_var
+ |  0.000 | -0.032 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.44.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.44.bias
+ |  0.517 |  0.110 |  0.995 |  0.248 | torch.Size([64]) || model.45.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.45.running_var
+ |  0.000 | -0.026 |  0.023 |  0.008 | torch.Size([1, 64, 3, 3]) || model.47.weight
+ |  0.000 |  0.000 |  0.000 |    nan | torch.Size([1]) || model.47.bias
+
+25-07-10 15:31:05.831 : <epoch:  3, iter:      10, lr:1.000e-04> G_loss: 7.515e-02 
+25-07-10 15:31:34.674 : <epoch:  6, iter:      20, lr:1.000e-04> G_loss: 6.176e-02 
+25-07-10 15:32:02.955 : <epoch:  9, iter:      30, lr:1.000e-04> G_loss: 4.950e-02 
+25-07-10 15:32:39.620 : <epoch: 13, iter:      40, lr:1.000e-04> G_loss: 4.025e-02 
+25-07-10 15:35:47.942 :   task: dncnn25
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  merge_bn: True
+  merge_bn_startpoint: 2000
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising\dncnn25
+    log: denoising\dncnn25
+    options: denoising\dncnn25\options
+    models: denoising\dncnn25\models
+    images: denoising\dncnn25\images
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: dncnn
+      dataroot_H: trainsets/trainH
+      dataroot_L: None
+      H_size: 40
+      sigma: 25
+      sigma_test: 25
+      dataloader_shuffle: True
+      dataloader_num_workers: 4
+      dataloader_batch_size: 16
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: dncnn
+      dataroot_H: testsets/bsd68
+      dataroot_L: None
+      sigma: 25
+      sigma_test: 25
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: dncnn
+    in_nc: 1
+    out_nc: 1
+    nc: 64
+    nb: 17
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: BR
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    G_lossfn_type: l1
+    G_lossfn_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [500, 1000, 2000, 5000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 100
+    checkpoint_save: 100
+    checkpoint_print: 10
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_dncnn.json
+  is_train: True
+  find_unused_parameters: False
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+
+25-07-10 15:35:47.946 : Random seed: 3080
+25-07-10 15:35:47.956 : Number of train images: 12, iters: 1
+25-07-10 15:35:48.662 : 
+Networks name: DnCNN
+Params number: 557057
+Net structure:
+DnCNN(
+  (model): Sequential(
+    (0): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (4): ReLU(inplace=True)
+    (5): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (7): ReLU(inplace=True)
+    (8): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (9): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (10): ReLU(inplace=True)
+    (11): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (12): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (13): ReLU(inplace=True)
+    (14): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (16): ReLU(inplace=True)
+    (17): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (19): ReLU(inplace=True)
+    (20): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (21): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (22): ReLU(inplace=True)
+    (23): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (24): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (25): ReLU(inplace=True)
+    (26): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (28): ReLU(inplace=True)
+    (29): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (30): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (31): ReLU(inplace=True)
+    (32): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (33): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (34): ReLU(inplace=True)
+    (35): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (36): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (37): ReLU(inplace=True)
+    (38): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (39): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (40): ReLU(inplace=True)
+    (41): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (42): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (43): ReLU(inplace=True)
+    (44): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (45): BatchNorm2d(64, eps=0.0001, momentum=0.9, affine=True, track_running_stats=True)
+    (46): ReLU(inplace=True)
+    (47): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+  )
+)
+
+25-07-10 15:35:49.419 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ |  0.001 | -0.075 |  0.084 |  0.025 | torch.Size([64, 1, 3, 3]) || model.0.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.0.bias
+ |  0.000 | -0.034 |  0.036 |  0.008 | torch.Size([64, 64, 3, 3]) || model.2.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.2.bias
+ |  0.536 |  0.109 |  0.982 |  0.258 | torch.Size([64]) || model.3.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.3.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.3.running_var
+ | -0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.5.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.5.bias
+ |  0.565 |  0.132 |  0.995 |  0.235 | torch.Size([64]) || model.6.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.6.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.6.running_var
+ |  0.000 | -0.034 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || model.8.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.8.bias
+ |  0.563 |  0.115 |  0.994 |  0.260 | torch.Size([64]) || model.9.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.9.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.9.running_var
+ |  0.000 | -0.035 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.11.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.11.bias
+ |  0.559 |  0.118 |  0.988 |  0.250 | torch.Size([64]) || model.12.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.12.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.12.running_var
+ | -0.000 | -0.037 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.14.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.14.bias
+ |  0.544 |  0.101 |  0.983 |  0.260 | torch.Size([64]) || model.15.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.15.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.15.running_var
+ | -0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.17.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.17.bias
+ |  0.587 |  0.106 |  0.982 |  0.277 | torch.Size([64]) || model.18.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.18.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.18.running_var
+ |  0.000 | -0.036 |  0.037 |  0.008 | torch.Size([64, 64, 3, 3]) || model.20.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.20.bias
+ |  0.583 |  0.100 |  0.979 |  0.259 | torch.Size([64]) || model.21.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.21.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.21.running_var
+ |  0.000 | -0.033 |  0.038 |  0.008 | torch.Size([64, 64, 3, 3]) || model.23.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.23.bias
+ |  0.532 |  0.121 |  0.990 |  0.252 | torch.Size([64]) || model.24.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.24.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.24.running_var
+ |  0.000 | -0.036 |  0.031 |  0.008 | torch.Size([64, 64, 3, 3]) || model.26.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.26.bias
+ |  0.570 |  0.136 |  0.976 |  0.223 | torch.Size([64]) || model.27.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.27.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.27.running_var
+ | -0.000 | -0.033 |  0.038 |  0.008 | torch.Size([64, 64, 3, 3]) || model.29.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.29.bias
+ |  0.513 |  0.104 |  0.998 |  0.238 | torch.Size([64]) || model.30.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.30.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.30.running_var
+ |  0.000 | -0.035 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || model.32.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.32.bias
+ |  0.468 |  0.101 |  0.998 |  0.276 | torch.Size([64]) || model.33.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.33.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.33.running_var
+ | -0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || model.35.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.35.bias
+ |  0.476 |  0.100 |  0.997 |  0.272 | torch.Size([64]) || model.36.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.36.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.36.running_var
+ |  0.000 | -0.035 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.38.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.38.bias
+ |  0.535 |  0.117 |  0.915 |  0.246 | torch.Size([64]) || model.39.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.39.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.39.running_var
+ |  0.000 | -0.036 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.41.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.41.bias
+ |  0.563 |  0.106 |  0.966 |  0.251 | torch.Size([64]) || model.42.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.42.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.42.running_var
+ | -0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || model.44.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.44.bias
+ |  0.542 |  0.106 |  0.998 |  0.281 | torch.Size([64]) || model.45.weight
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.bias
+ |  0.000 |  0.000 |  0.000 |  0.000 | torch.Size([64]) || model.45.running_mean
+ |  1.000 |  1.000 |  1.000 |  0.000 | torch.Size([64]) || model.45.running_var
+ |  0.000 | -0.028 |  0.021 |  0.008 | torch.Size([1, 64, 3, 3]) || model.47.weight
+ |  0.000 |  0.000 |  0.000 |    nan | torch.Size([1]) || model.47.bias
+
