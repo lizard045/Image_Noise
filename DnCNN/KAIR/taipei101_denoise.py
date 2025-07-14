@@ -6,6 +6,7 @@ import logging
 import torch
 import numpy as np
 from collections import OrderedDict
+import cv2
 
 from utils import utils_logger
 from utils import utils_image as util
@@ -19,6 +20,13 @@ from models.network_unet import UNetRes
 python taipei101_denoise.py --input_dir testsets/taipei101 --output_dir taipei101_color_denoised
 
 """
+
+def detail_enhancement(denoised_img, original_img):
+    # 提取細節
+    detail = cv2.bilateralFilter(original_img, 9, 75, 75)
+    # 混合細節回去
+    enhanced = cv2.addWeighted(denoised_img, 0.8, detail, 0.2, 0)
+    return enhanced
 
 def main():
     # ----------------------------------------
@@ -155,6 +163,9 @@ def main():
             # 確保輸出影像尺寸正確
             if img_E.shape != original_shape:
                 logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
+            
+            # 細節增強
+            img_E = detail_enhancement(img_E, util.imread_uint(img_path, n_channels=3))
             
             # 儲存結果
             output_path = os.path.join(args.output_dir, img_name)
