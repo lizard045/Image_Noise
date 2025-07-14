@@ -1,12 +1,10 @@
 # 大檔案和模型檔案
-*.pth
 *.pt
 *.ckpt
 *.h5
 *.pb
 *.onnx
 *.tflite
-*.zip
 *.rar
 *.7z
 *.tar.gz
