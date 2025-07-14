@@ -56,7 +56,7 @@ ehthumbs.db
 Thumbs.db
 
 # 日誌檔案
-*.log
+#*.log
 
 # 暫存檔案
 tmp/

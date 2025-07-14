@@ -21,12 +21,73 @@ python taipei101_denoise.py --input_dir testsets/taipei101 --output_dir taipei10
 
 """
 
-def detail_enhancement(denoised_img, original_img):
-    # 提取細節
-    detail = cv2.bilateralFilter(original_img, 9, 75, 75)
-    # 混合細節回去
-    enhanced = cv2.addWeighted(denoised_img, 0.8, detail, 0.2, 0)
-    return enhanced
+def advanced_detail_enhancement(denoised_img, original_img):
+    """
+    進階細節增強處理
+    """
+    # 轉換為灰階分析
+    if len(original_img.shape) == 3:
+        gray_orig = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+        gray_denoised = cv2.cvtColor(denoised_img, cv2.COLOR_BGR2GRAY)
+    else:
+        gray_orig = original_img
+        gray_denoised = denoised_img
+    
+    # 計算局部統計
+    kernel = np.ones((5, 5), np.float32) / 25
+    local_mean = cv2.filter2D(gray_orig.astype(np.float32), -1, kernel)
+    local_sqr_mean = cv2.filter2D((gray_orig.astype(np.float32))**2, -1, kernel)
+    local_var = local_sqr_mean - local_mean**2
+    
+    # 計算梯度資訊
+    grad_x = cv2.Sobel(gray_orig, cv2.CV_64F, 1, 0, ksize=3)
+    grad_y = cv2.Sobel(gray_orig, cv2.CV_64F, 0, 1, ksize=3)
+    gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2)
+    
+    # 建立不同區域的遮罩
+    high_var_threshold = np.percentile(local_var, 75)
+    high_brightness_threshold = np.percentile(local_mean, 80)
+    high_gradient_threshold = np.percentile(gradient_magnitude, 80)
+    
+    # 邊緣區域：保持更多原始細節
+    edge_mask = (local_var > high_var_threshold) & (gradient_magnitude > high_gradient_threshold)
+    
+    # 亮部區域：特別保護
+    bright_mask = local_mean > high_brightness_threshold
+    
+    result = denoised_img.copy().astype(np.float32)
+    
+    # 對邊緣區域恢復更多細節
+    if np.sum(edge_mask) > 0:
+        edge_weight = 0.6  # 增加邊緣細節權重
+        for i in range(denoised_img.shape[2] if len(denoised_img.shape) == 3 else 1):
+            if len(denoised_img.shape) == 3:
+                result[:, :, i][edge_mask] = (
+                    edge_weight * original_img[:, :, i][edge_mask] + 
+                    (1 - edge_weight) * denoised_img[:, :, i][edge_mask]
+                )
+            else:
+                result[edge_mask] = (
+                    edge_weight * original_img[edge_mask] + 
+                    (1 - edge_weight) * denoised_img[edge_mask]
+                )
+    
+    # 對亮部區域特別處理
+    if np.sum(bright_mask) > 0:
+        bright_weight = 0.4  # 亮部細節權重
+        for i in range(denoised_img.shape[2] if len(denoised_img.shape) == 3 else 1):
+            if len(denoised_img.shape) == 3:
+                result[:, :, i][bright_mask] = (
+                    bright_weight * original_img[:, :, i][bright_mask] + 
+                    (1 - bright_weight) * denoised_img[:, :, i][bright_mask]
+                )
+            else:
+                result[bright_mask] = (
+                    bright_weight * original_img[bright_mask] + 
+                    (1 - bright_weight) * denoised_img[bright_mask]
+                )
+    
+    return np.clip(result, 0, 255).astype(np.uint8)
 
 def main():
     # ----------------------------------------
@@ -165,7 +226,7 @@ def main():
                 logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
             
             # 細節增強
-            img_E = detail_enhancement(img_E, util.imread_uint(img_path, n_channels=3))
+            img_E = advanced_detail_enhancement(img_E, util.imread_uint(img_path, n_channels=3))
             
             # 儲存結果
             output_path = os.path.join(args.output_dir, img_name)
