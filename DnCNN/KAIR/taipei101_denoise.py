@@ -89,6 +89,155 @@ def advanced_detail_enhancement(denoised_img, original_img):
     
     return np.clip(result, 0, 255).astype(np.uint8)
 
+def adaptive_noise_level_processing(model, img_L, device, base_noise_level=10.0):
+    """
+    根據影像區域特性調整雜訊等級
+    """
+    # 轉換為numpy進行分析
+    img_np = util.tensor2uint(img_L)
+    
+    if len(img_np.shape) == 3:
+        gray = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = img_np
+    
+    # 計算局部方差
+    kernel = np.ones((5, 5), np.float32) / 25
+    local_mean = cv2.filter2D(gray.astype(np.float32), -1, kernel)
+    local_sqr_mean = cv2.filter2D((gray.astype(np.float32))**2, -1, kernel)
+    local_var = local_sqr_mean - local_mean**2
+    
+    # 根據局部方差調整雜訊等級
+    # 高方差區域（邊緣）使用較低的雜訊等級
+    # 低方差區域（平滑區域）使用較高的雜訊等級
+    var_percentiles = np.percentile(local_var, [25, 75])
+    
+    results = []
+    noise_levels = []
+    
+    # 處理不同雜訊等級
+    for noise_factor in [0.7, 1.0, 1.3]:  # 低、中、高雜訊等級
+        current_noise_level = base_noise_level * noise_factor
+        noise_level_normalized = current_noise_level / 255.0
+        
+        noise_level_tensor = torch.full((1, 1, img_L.shape[2], img_L.shape[3]), 
+                                      noise_level_normalized).to(device)
+        img_input = torch.cat([img_L, noise_level_tensor], dim=1)
+        
+        with torch.no_grad():
+            img_E = model(img_input)
+            results.append(util.tensor2uint(img_E))
+            noise_levels.append(current_noise_level)
+    
+    # 根據局部特性混合結果
+    final_result = np.zeros_like(results[0])
+    
+    # 低方差區域使用高雜訊等級處理結果
+    low_var_mask = local_var < var_percentiles[0]
+    final_result[low_var_mask] = results[2][low_var_mask]  # 高雜訊等級
+    
+    # 高方差區域使用低雜訊等級處理結果
+    high_var_mask = local_var > var_percentiles[1]
+    final_result[high_var_mask] = results[0][high_var_mask]  # 低雜訊等級
+    
+    # 中間區域使用中等雜訊等級
+    medium_mask = ~(low_var_mask | high_var_mask)
+    final_result[medium_mask] = results[1][medium_mask]  # 中等雜訊等級
+    
+    return final_result
+
+def multi_scale_denoising(model, img_L, device, noise_level_normalized):
+    """
+    多尺度去噪處理
+    """
+    results = []
+    scales = [1.0, 0.8, 0.6]  # 不同縮放比例
+    
+    for scale in scales:
+        if scale != 1.0:
+            # 縮放影像
+            h, w = img_L.shape[2], img_L.shape[3]
+            new_h, new_w = int(h * scale), int(w * scale)
+            img_scaled = util.imresize_np(img_L, [new_h, new_w], True) # 使用util.imresize_np
+        else:
+            img_scaled = img_L
+        
+        # 添加雜訊等級資訊
+        noise_level_tensor = torch.full((1, 1, img_scaled.shape[2], img_scaled.shape[3]), 
+                                      noise_level_normalized).to(device)
+        img_input = torch.cat([img_scaled, noise_level_tensor], dim=1)
+        
+        # 去噪處理
+        with torch.no_grad():
+            img_E = model(img_input)
+        
+        # 如果縮放過，需要恢復原始尺寸
+        if scale != 1.0:
+            img_E = util.imresize_np(img_E, [h, w], True) # 使用util.imresize_np
+        
+        results.append(util.tensor2uint(img_E))
+    
+    # 加權融合不同尺度的結果
+    weights = [0.5, 0.3, 0.2]  # 原尺寸權重最高
+    final_result = np.zeros_like(results[0]).astype(np.float32)
+    
+    for result, weight in zip(results, weights):
+        final_result += result.astype(np.float32) * weight
+    
+    return np.clip(final_result, 0, 255).astype(np.uint8)
+
+def frequency_domain_detail_preservation(denoised_img, original_img, detail_ratio=0.3):
+    """
+    在頻域中保護高頻細節
+    """
+    # 轉換為灰階進行頻域分析
+    if len(original_img.shape) == 3:
+        gray_orig = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+        gray_denoised = cv2.cvtColor(denoised_img, cv2.COLOR_BGR2GRAY)
+    else:
+        gray_orig = original_img
+        gray_denoised = denoised_img
+    
+    # FFT變換
+    f_orig = np.fft.fft2(gray_orig.astype(np.float32))
+    f_denoised = np.fft.fft2(gray_denoised.astype(np.float32))
+    
+    # 創建高通濾波器
+    rows, cols = gray_orig.shape
+    center_row, center_col = rows // 2, cols // 2
+    
+    # 創建頻域遮罩
+    y, x = np.ogrid[:rows, :cols]
+    distance = np.sqrt((y - center_row)**2 + (x - center_col)**2)
+    
+    # 高頻遮罩（保留高頻細節）
+    high_freq_mask = distance > min(rows, cols) * 0.1
+    
+    # 在高頻部分混合原始和去噪後的頻譜
+    f_enhanced = f_denoised.copy()
+    f_enhanced[high_freq_mask] = (
+        (1 - detail_ratio) * f_denoised[high_freq_mask] + 
+        detail_ratio * f_orig[high_freq_mask]
+    )
+    
+    # 逆FFT變換
+    enhanced_gray = np.real(np.fft.ifft2(f_enhanced))
+    enhanced_gray = np.clip(enhanced_gray, 0, 255).astype(np.uint8)
+    
+    # 如果是彩色影像，需要將細節增強應用到彩色影像
+    if len(denoised_img.shape) == 3:
+        # 計算細節差異
+        detail_diff = enhanced_gray.astype(np.float32) - gray_denoised.astype(np.float32)
+        
+        # 將細節差異應用到每個顏色通道
+        result = denoised_img.astype(np.float32)
+        for i in range(3):
+            result[:, :, i] += detail_diff * 0.8  # 調整細節強度
+        
+        return np.clip(result, 0, 255).astype(np.uint8)
+    else:
+        return enhanced_gray
+
 def main():
     # ----------------------------------------
     # 參數設定
@@ -208,25 +357,25 @@ def main():
             original_shape = img_L.shape
             
             # 轉換為tensor
-            img_L = util.uint2tensor4(img_L)
-            img_L = img_L.to(device)
+            img_tensor = util.uint2tensor4(img_L)
+            img_tensor = img_tensor.to(device)
             
-            # 添加雜訊等級資訊
-            noise_level_tensor = torch.full((1, 1, img_L.shape[2], img_L.shape[3]), 
-                                          noise_level_normalized).to(device)
-            img_input = torch.cat([img_L, noise_level_tensor], dim=1)
+            # 使用自適應雜訊等級處理
+            img_E = adaptive_noise_level_processing(model, img_tensor, device, args.noise_level)
             
-            # 去噪處理
-            with torch.no_grad():
-                img_E = model(img_input)
-                img_E = util.tensor2uint(img_E)
+            # 或者使用多尺度處理（根據需要選擇）
+            # noise_level_normalized = args.noise_level / 255.0
+            # img_E = multi_scale_denoising(model, img_tensor, device, noise_level_normalized)
             
             # 確保輸出影像尺寸正確
             if img_E.shape != original_shape:
                 logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
             
-            # 細節增強
-            img_E = advanced_detail_enhancement(img_E, util.imread_uint(img_path, n_channels=3))
+            # 進階細節增強
+            img_E = advanced_detail_enhancement(img_E, img_L)
+            
+            # 頻域細節保護
+            img_E = frequency_domain_detail_preservation(img_E, img_L, detail_ratio=0.2)
             
             # 儲存結果
             output_path = os.path.join(args.output_dir, img_name)
