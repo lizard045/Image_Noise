@@ -11,6 +11,24 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
+# 添加新指標所需的依賴
+try:
+    import lpips
+    LPIPS_AVAILABLE = True
+except ImportError:
+    LPIPS_AVAILABLE = False
+    print("Warning: LPIPS not available. Install with: pip install lpips")
+
+try:
+    import pyiqa
+    NIQE_AVAILABLE = True
+except ImportError:
+    NIQE_AVAILABLE = False
+    print("Warning: NIQE not available. Install with: pip install pyiqa")
+
+from PIL import Image
+import torchvision.transforms as transforms
+
 
 '''
 # --------------------------------------------
@@ -1009,8 +1027,157 @@ if __name__ == '__main__':
 #    imssave(patches,'a.png')
 
 
+# --------------------------------------------
+# NIQE 計算
+# --------------------------------------------
+def calculate_niqe(img):
+    """
+    計算 NIQE (No-Reference Image Quality Evaluator) 指標
     
+    Args:
+        img: 輸入影像 [0, 255]，可以是 numpy array 或檔案路徑
     
+    Returns:
+        niqe_score: NIQE 分數（越低越好）
+    """
+    if not NIQE_AVAILABLE:
+        print("Error: NIQE not available. Please install pyiqa: pip install pyiqa")
+        return None
     
+    try:
+        # 創建 NIQE 評估器
+        niqe_metric = pyiqa.create_metric('niqe', device='cpu')
+        
+        # 如果輸入是 numpy array，轉換為 PIL Image
+        if isinstance(img, np.ndarray):
+            if img.dtype == np.uint8:
+                img_pil = Image.fromarray(img)
+            else:
+                img_pil = Image.fromarray((img * 255).astype(np.uint8))
+        else:
+            img_pil = Image.open(img) if isinstance(img, str) else img
+        
+        # 轉換為 RGB 模式
+        if img_pil.mode != 'RGB':
+            img_pil = img_pil.convert('RGB')
+        
+        # 轉換為 tensor
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+        
+        img_tensor = transform(img_pil).unsqueeze(0)  # 添加 batch 維度
+        
+        # 計算 NIQE
+        niqe_score = niqe_metric(img_tensor).item()
+        
+        return niqe_score
+        
+    except Exception as e:
+        print(f"Error calculating NIQE: {str(e)}")
+        return None
+
+
+# --------------------------------------------
+# LPIPS 計算
+# --------------------------------------------
+def calculate_lpips(img1, img2, net='alex'):
+    """
+    計算 LPIPS (Learned Perceptual Image Patch Similarity) 指標
     
+    Args:
+        img1, img2: 輸入影像 [0, 255]，numpy arrays
+        net: 使用的網路架構 ('alex', 'vgg', 'squeeze')
     
+    Returns:
+        lpips_score: LPIPS 分數（越低越好，表示更相似）
+    """
+    if not LPIPS_AVAILABLE:
+        print("Error: LPIPS not available. Please install lpips: pip install lpips")
+        return None
+    
+    try:
+        # 創建 LPIPS 評估器
+        lpips_metric = lpips.LPIPS(net=net, verbose=False)
+        
+        def preprocess_image(img):
+            """預處理影像為 LPIPS 需要的格式"""
+            # 確保影像是 3 通道
+            if len(img.shape) == 2:
+                img = np.stack([img] * 3, axis=-1)
+            elif img.shape[2] == 1:
+                img = np.repeat(img, 3, axis=2)
+            
+            # 正規化到 [-1, 1]
+            img = img.astype(np.float32) / 127.5 - 1.0
+            
+            # 轉換為 tensor (C, H, W)
+            img_tensor = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0)
+            
+            return img_tensor
+        
+        # 預處理兩張影像
+        img1_tensor = preprocess_image(img1)
+        img2_tensor = preprocess_image(img2)
+        
+        # 確保 tensor 尺寸一致
+        if img1_tensor.shape != img2_tensor.shape:
+            print(f"Warning: Image shapes don't match. img1: {img1_tensor.shape}, img2: {img2_tensor.shape}")
+            return None
+        
+        # 計算 LPIPS
+        with torch.no_grad():
+            lpips_score = lpips_metric(img1_tensor, img2_tensor).item()
+        
+        return lpips_score
+        
+    except Exception as e:
+        print(f"Error calculating LPIPS: {str(e)}")
+        return None
+
+
+# --------------------------------------------
+# 批次計算所有指標
+# --------------------------------------------
+def calculate_all_metrics(img1, img2, border=0):
+    """
+    計算所有影像品質指標
+    
+    Args:
+        img1, img2: 輸入影像 [0, 255]
+        border: 計算時忽略的邊界像素數
+    
+    Returns:
+        metrics: 包含所有指標的字典
+    """
+    metrics = {}
+    
+    # 計算 PSNR
+    try:
+        metrics['psnr'] = calculate_psnr(img1, img2, border)
+    except Exception as e:
+        print(f"Error calculating PSNR: {e}")
+        metrics['psnr'] = None
+    
+    # 計算 SSIM
+    try:
+        metrics['ssim'] = calculate_ssim(img1, img2, border)
+    except Exception as e:
+        print(f"Error calculating SSIM: {e}")
+        metrics['ssim'] = None
+    
+    # 計算 LPIPS (只對去噪影像)
+    try:
+        metrics['lpips'] = calculate_lpips(img1, img2)
+    except Exception as e:
+        print(f"Error calculating LPIPS: {e}")
+        metrics['lpips'] = None
+    
+    # 計算 NIQE (只對去噪影像)
+    try:
+        metrics['niqe'] = calculate_niqe(img1)  # 通常對去噪後的影像計算
+    except Exception as e:
+        print(f"Error calculating NIQE: {e}")
+        metrics['niqe'] = None
+    
+    return metrics

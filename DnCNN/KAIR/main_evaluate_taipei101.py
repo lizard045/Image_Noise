@@ -12,13 +12,23 @@ from utils import utils_image as util
 
 """
 台北101影像去噪評估腳本
-專門用於比對原圖和去噪後結果的PSNR和SSIM指標
+專門用於比對原圖和去噪後結果的多項品質指標
+
+支援的評估指標:
+- PSNR (Peak Signal-to-Noise Ratio): 峰值信噪比
+- SSIM (Structural Similarity Index): 結構相似性指標
+- LPIPS (Learned Perceptual Image Patch Similarity): 學習感知相似性
+- NIQE (No-Reference Image Quality Evaluator): 無參考影像品質評估
 
 使用方法:
 python main_evaluate_taipei101.py --original_dir testsets/taipei101 --denoised_dir taipei101_color_denoised
 
 原圖路徑: testsets/taipei101
 去噪結果: taipei101_color_denoised
+
+注意: 
+- 請先安裝依賴: pip install -r requirements.txt
+- LPIPS 和 NIQE 需要額外套件，如無法安裝會顯示警告並跳過計算
 """
 
 def main():
@@ -92,6 +102,8 @@ def main():
     test_results = OrderedDict()
     test_results['psnr'] = []
     test_results['ssim'] = []
+    test_results['lpips'] = []
+    test_results['niqe'] = []
     test_results['filenames'] = []
     
     logger.info('\n開始評估影像品質...')
@@ -114,16 +126,29 @@ def main():
             if img_denoised.shape[:2] != img_original.shape[:2]:
                 continue  # 跳過尺寸差異過大的影像
         
-        # 計算PSNR和SSIM
+        # 計算所有品質指標
         try:
+            # 計算傳統指標
             psnr = util.calculate_psnr(img_denoised, img_original, border=args.border)
             ssim = util.calculate_ssim(img_denoised, img_original, border=args.border)
             
+            # 計算新指標
+            lpips_score = util.calculate_lpips(img_denoised, img_original)
+            niqe_score = util.calculate_niqe(img_denoised)
+            
+            # 儲存結果
             test_results['psnr'].append(psnr)
             test_results['ssim'].append(ssim)
+            test_results['lpips'].append(lpips_score if lpips_score is not None else 0.0)
+            test_results['niqe'].append(niqe_score if niqe_score is not None else 0.0)
             test_results['filenames'].append(filename)
             
-            logger.info(f'{idx+1:3d}/{len(common_files):3d} - {filename:<40} - PSNR: {psnr:6.2f} dB, SSIM: {ssim:.4f}')
+            # 顯示結果
+            lpips_str = f'LPIPS: {lpips_score:.4f}' if lpips_score is not None else 'LPIPS: N/A'
+            niqe_str = f'NIQE: {niqe_score:.4f}' if niqe_score is not None else 'NIQE: N/A'
+            
+            logger.info(f'{idx+1:3d}/{len(common_files):3d} - {filename:<40}')
+            logger.info(f'    PSNR: {psnr:6.2f} dB, SSIM: {ssim:.4f}, {lpips_str}, {niqe_str}')
             
         except Exception as e:
             logger.error(f'{filename} - 評估失敗: {str(e)}')
@@ -133,10 +158,20 @@ def main():
     # 統計結果
     # ----------------------------------------
     if len(test_results['psnr']) > 0:
+        # 計算基本統計
         avg_psnr = np.mean(test_results['psnr'])
         avg_ssim = np.mean(test_results['ssim'])
         std_psnr = np.std(test_results['psnr'])
         std_ssim = np.std(test_results['ssim'])
+        
+        # 計算新指標統計（排除 None 值）
+        valid_lpips = [x for x in test_results['lpips'] if x is not None and x != 0.0]
+        valid_niqe = [x for x in test_results['niqe'] if x is not None and x != 0.0]
+        
+        avg_lpips = np.mean(valid_lpips) if valid_lpips else None
+        std_lpips = np.std(valid_lpips) if valid_lpips else None
+        avg_niqe = np.mean(valid_niqe) if valid_niqe else None
+        std_niqe = np.std(valid_niqe) if valid_niqe else None
         
         logger.info('\n' + '=' * 80)
         logger.info(' 評估結果統計')
@@ -144,6 +179,21 @@ def main():
         logger.info(f'處理影像數量: {len(test_results["psnr"])}')
         logger.info(f'平均 PSNR: {avg_psnr:.2f} ± {std_psnr:.2f} dB')
         logger.info(f'平均 SSIM: {avg_ssim:.4f} ± {std_ssim:.4f}')
+        
+        if avg_lpips is not None:
+            logger.info(f'平均 LPIPS: {avg_lpips:.4f} ± {std_lpips:.4f}')
+            logger.info(f'最低 LPIPS: {min(valid_lpips):.4f} ({test_results["filenames"][test_results["lpips"].index(min(valid_lpips))]})')
+            logger.info(f'最高 LPIPS: {max(valid_lpips):.4f} ({test_results["filenames"][test_results["lpips"].index(max(valid_lpips))]})')
+        else:
+            logger.info('LPIPS: 無法計算')
+        
+        if avg_niqe is not None:
+            logger.info(f'平均 NIQE: {avg_niqe:.4f} ± {std_niqe:.4f}')
+            logger.info(f'最低 NIQE: {min(valid_niqe):.4f} ({test_results["filenames"][test_results["niqe"].index(min(valid_niqe))]})')
+            logger.info(f'最高 NIQE: {max(valid_niqe):.4f} ({test_results["filenames"][test_results["niqe"].index(max(valid_niqe))]})')
+        else:
+            logger.info('NIQE: 無法計算')
+        
         logger.info(f'最高 PSNR: {max(test_results["psnr"]):.2f} dB ({test_results["filenames"][test_results["psnr"].index(max(test_results["psnr"]))]})')
         logger.info(f'最低 PSNR: {min(test_results["psnr"]):.2f} dB ({test_results["filenames"][test_results["psnr"].index(min(test_results["psnr"]))]})')
         logger.info(f'最高 SSIM: {max(test_results["ssim"]):.4f} ({test_results["filenames"][test_results["ssim"].index(max(test_results["ssim"]))]})')
@@ -154,11 +204,21 @@ def main():
         csv_path = os.path.join(args.results_dir, 'detailed_results.csv')
         with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(['檔案名稱', 'PSNR (dB)', 'SSIM'])
+            writer.writerow(['檔案名稱', 'PSNR (dB)', 'SSIM', 'LPIPS', 'NIQE'])
             for i, filename in enumerate(test_results['filenames']):
-                writer.writerow([filename, f'{test_results["psnr"][i]:.2f}', f'{test_results["ssim"][i]:.4f}'])
-            writer.writerow(['平均值', f'{avg_psnr:.2f}', f'{avg_ssim:.4f}'])
-            writer.writerow(['標準差', f'{std_psnr:.2f}', f'{std_ssim:.4f}'])
+                lpips_val = f'{test_results["lpips"][i]:.4f}' if test_results["lpips"][i] is not None and test_results["lpips"][i] != 0.0 else 'N/A'
+                niqe_val = f'{test_results["niqe"][i]:.4f}' if test_results["niqe"][i] is not None and test_results["niqe"][i] != 0.0 else 'N/A'
+                writer.writerow([filename, f'{test_results["psnr"][i]:.2f}', f'{test_results["ssim"][i]:.4f}', lpips_val, niqe_val])
+            
+            # 寫入平均值
+            avg_lpips_str = f'{avg_lpips:.4f}' if avg_lpips is not None else 'N/A'
+            avg_niqe_str = f'{avg_niqe:.4f}' if avg_niqe is not None else 'N/A'
+            writer.writerow(['平均值', f'{avg_psnr:.2f}', f'{avg_ssim:.4f}', avg_lpips_str, avg_niqe_str])
+            
+            # 寫入標準差
+            std_lpips_str = f'{std_lpips:.4f}' if std_lpips is not None else 'N/A'
+            std_niqe_str = f'{std_niqe:.4f}' if std_niqe is not None else 'N/A'
+            writer.writerow(['標準差', f'{std_psnr:.2f}', f'{std_ssim:.4f}', std_lpips_str, std_niqe_str])
         
         logger.info(f'\n 詳細結果已儲存至: {csv_path}')
         logger.info(' 評估完成！')
@@ -166,6 +226,14 @@ def main():
         print(f'\n 台北101去噪效果評估結果:')
         print(f' 平均 PSNR: {avg_psnr:.2f} dB')
         print(f' 平均 SSIM: {avg_ssim:.4f}')
+        if avg_lpips is not None:
+            print(f' 平均 LPIPS: {avg_lpips:.4f}')
+        else:
+            print(f' 平均 LPIPS: 無法計算')
+        if avg_niqe is not None:
+            print(f' 平均 NIQE: {avg_niqe:.4f}')
+        else:
+            print(f' 平均 NIQE: 無法計算')
         print(f' 詳細結果: {csv_path}')
         
     else:
