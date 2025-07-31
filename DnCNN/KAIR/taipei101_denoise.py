@@ -7,11 +7,12 @@ import torch
 import numpy as np
 from collections import OrderedDict
 import cv2
+import ipdb
 
 from utils import utils_logger
 from utils import utils_image as util
 from models.network_unet import UNetRes
-
+import models.network_unet as nunet
 """
 台北101影像去噪腳本
 使用DRUNet模型進行彩色影像去噪處理
@@ -20,6 +21,8 @@ from models.network_unet import UNetRes
 python taipei101_denoise.py --input_dir testsets/taipei101 --output_dir taipei101_color_denoised
 
 """
+print("實際匯入檔案：", nunet.__file__)
+print("UNetRes 參數：", nunet.UNetRes.__init__.__code__.co_varnames)
 
 def advanced_detail_enhancement(denoised_img, original_img):
     """
@@ -59,7 +62,7 @@ def advanced_detail_enhancement(denoised_img, original_img):
     
     # 對邊緣區域恢復更多細節
     if np.sum(edge_mask) > 0:
-        edge_weight = 0.6  # 增加邊緣細節權重
+        edge_weight = 0.75  # 增加邊緣細節權重
         for i in range(denoised_img.shape[2] if len(denoised_img.shape) == 3 else 1):
             if len(denoised_img.shape) == 3:
                 result[:, :, i][edge_mask] = (
@@ -74,7 +77,7 @@ def advanced_detail_enhancement(denoised_img, original_img):
     
     # 對亮部區域特別處理
     if np.sum(bright_mask) > 0:
-        bright_weight = 0.4  # 亮部細節權重
+        bright_weight = 0.6  # 亮部細節權重
         for i in range(denoised_img.shape[2] if len(denoised_img.shape) == 3 else 1):
             if len(denoised_img.shape) == 3:
                 result[:, :, i][bright_mask] = (
@@ -116,7 +119,7 @@ def adaptive_noise_level_processing(model, img_L, device, base_noise_level=10.0)
     noise_levels = []
     
     # 處理不同雜訊等級
-    for noise_factor in [0.7, 1.0, 1.3]:  # 低、中、高雜訊等級
+    for noise_factor in [0.5, 1.0, 1.5]:  # 低、中、高雜訊等級
         current_noise_level = base_noise_level * noise_factor
         noise_level_normalized = current_noise_level / 255.0
         
@@ -146,45 +149,45 @@ def adaptive_noise_level_processing(model, img_L, device, base_noise_level=10.0)
     
     return final_result
 
-def multi_scale_denoising(model, img_L, device, noise_level_normalized):
-    """
-    多尺度去噪處理
-    """
-    results = []
-    scales = [1.0, 0.8, 0.6]  # 不同縮放比例
+# def multi_scale_denoising(model, img_L, device, noise_level_normalized):
+#     """
+#     多尺度去噪處理
+#     """
+#     results = []
+#     scales = [1.0, 0.8, 0.6]  # 不同縮放比例
     
-    for scale in scales:
-        if scale != 1.0:
-            # 縮放影像
-            h, w = img_L.shape[2], img_L.shape[3]
-            new_h, new_w = int(h * scale), int(w * scale)
-            img_scaled = util.imresize_np(img_L, [new_h, new_w], True) # 使用util.imresize_np
-        else:
-            img_scaled = img_L
+#     for scale in scales:
+#         if scale != 1.0:
+#             # 縮放影像
+#             h, w = img_L.shape[2], img_L.shape[3]
+#             new_h, new_w = int(h * scale), int(w * scale)
+#             img_scaled = util.imresize_np(img_L, [new_h, new_w], True) # 使用util.imresize_np
+#         else:
+#             img_scaled = img_L
         
-        # 添加雜訊等級資訊
-        noise_level_tensor = torch.full((1, 1, img_scaled.shape[2], img_scaled.shape[3]), 
-                                      noise_level_normalized).to(device)
-        img_input = torch.cat([img_scaled, noise_level_tensor], dim=1)
+#         # 添加雜訊等級資訊
+#         noise_level_tensor = torch.full((1, 1, img_scaled.shape[2], img_scaled.shape[3]), 
+#                                       noise_level_normalized).to(device)
+#         img_input = torch.cat([img_scaled, noise_level_tensor], dim=1)
         
-        # 去噪處理
-        with torch.no_grad():
-            img_E = model(img_input)
+#         # 去噪處理
+#         with torch.no_grad():
+#             img_E = model(img_input)
         
-        # 如果縮放過，需要恢復原始尺寸
-        if scale != 1.0:
-            img_E = util.imresize_np(img_E, [h, w], True) # 使用util.imresize_np
+#         # 如果縮放過，需要恢復原始尺寸
+#         if scale != 1.0:
+#             img_E = util.imresize_np(img_E, [h, w], True) # 使用util.imresize_np
         
-        results.append(util.tensor2uint(img_E))
+#         results.append(util.tensor2uint(img_E))
     
-    # 加權融合不同尺度的結果
-    weights = [0.5, 0.3, 0.2]  # 原尺寸權重最高
-    final_result = np.zeros_like(results[0]).astype(np.float32)
+#     # 加權融合不同尺度的結果
+#     weights = [0.5, 0.3, 0.2]  # 原尺寸權重最高
+#     final_result = np.zeros_like(results[0]).astype(np.float32)
     
-    for result, weight in zip(results, weights):
-        final_result += result.astype(np.float32) * weight
+#     for result, weight in zip(results, weights):
+#         final_result += result.astype(np.float32) * weight
     
-    return np.clip(final_result, 0, 255).astype(np.uint8)
+#     return np.clip(final_result, 0, 255).astype(np.uint8)
 
 def frequency_domain_detail_preservation(denoised_img, original_img, detail_ratio=0.3):
     """
@@ -249,7 +252,7 @@ def main():
                        help='輸入影像目錄')
     parser.add_argument('--output_dir', type=str, default='taipei101_color_denoised',
                        help='輸出結果目錄')
-    parser.add_argument('--noise_level', type=float, default=10.0,
+    parser.add_argument('--noise_level', type=float, default=4.0,
                        help='雜訊等級 (0-255)')
     parser.add_argument('--device', type=str, default='auto',
                        help='運算設備: auto, cpu, cuda')
@@ -299,7 +302,7 @@ def main():
     try:
         logger.info('載入DRUNet彩色去噪模型...')
         model = UNetRes(in_nc=4, out_nc=3, nc=[64, 128, 256, 512], nb=4, act_mode='R', 
-                       downsample_mode="strideconv", upsample_mode="convtranspose", bias=False)
+                       downsample_mode="strideconv", upsample_mode="convtranspose", bias=False, use_nonlocal=True)
         
         # 載入預訓練權重
         model.load_state_dict(torch.load(args.model_path, map_location='cpu'), strict=True)
