@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import json
 import os
+import matplotlib.font_manager as fm
 
 class GPUMonitor:
     def __init__(self, log_interval=10):
@@ -143,23 +144,46 @@ class GPUMonitor:
         if not self.gpu_usage_history:
             return
         
+        # 設定中文字體
+        font_path = r'C:\Users\brogent\Desktop\Image_Noise\Mamelon.otf'
+        if os.path.exists(font_path):
+            chinese_font = fm.FontProperties(fname=font_path)
+            plt.rcParams['font.family'] = 'sans-serif'
+            plt.rcParams['axes.unicode_minus'] = False
+        else:
+            chinese_font = None
+            print(f"警告: 找不到字體檔案 {font_path}")
+        
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
         
         # GPU利用率圖
         ax1.plot(self.gpu_usage_history, 'b-', linewidth=2, label='GPU利用率')
-        ax1.set_ylabel('GPU利用率 (%)')
-        ax1.set_title('GPU性能監控')
+        ax1.set_ylabel('GPU利用率 (%)', fontproperties=chinese_font)
+        ax1.set_title('GPU性能監控', fontproperties=chinese_font)
         ax1.grid(True, alpha=0.3)
-        ax1.legend()
+        if chinese_font:
+            ax1.legend(prop=chinese_font)
+        else:
+            ax1.legend()
         ax1.set_ylim(0, 100)
         
         # 記憶體使用圖
         ax2.plot(self.memory_usage_history, 'r-', linewidth=2, label='記憶體使用')
-        ax2.set_ylabel('記憶體使用 (%)')
-        ax2.set_xlabel('時間點')
+        ax2.set_ylabel('記憶體使用 (%)', fontproperties=chinese_font)
+        ax2.set_xlabel('時間點', fontproperties=chinese_font)
         ax2.grid(True, alpha=0.3)
-        ax2.legend()
+        if chinese_font:
+            ax2.legend(prop=chinese_font)
+        else:
+            ax2.legend()
         ax2.set_ylim(0, 100)
+        
+        # 設定刻度標籤字體
+        if chinese_font:
+            for label in ax1.get_xticklabels() + ax1.get_yticklabels():
+                label.set_fontproperties(chinese_font)
+            for label in ax2.get_xticklabels() + ax2.get_yticklabels():
+                label.set_fontproperties(chinese_font)
         
         plt.tight_layout()
         plt.savefig('gpu_performance_report.png', dpi=300, bbox_inches='tight')
