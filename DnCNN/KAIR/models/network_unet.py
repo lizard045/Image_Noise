@@ -17,33 +17,55 @@ year={2020}
 # ====================
 '''
 
-class NonLocalBlock(nn.Module):
-    r"""
-    Non-Local Self-Attention (Wang et al., 2018)
-    ------------------------------------------------
-    y_i = (1 / C(x)) * Σ_j softmax(θ(x_i)^T φ(x_j)) · g(x_j)
-    z   = W(y) + x
-    """
-    def __init__(self, in_channels: int):
+# 修正bug: 創建色彩保護版本的NonLocal
+class ColorPreservingNonLocalBlock(nn.Module):
+    """色彩保護的NonLocal模塊"""
+    def __init__(self, in_channels: int, preserve_ratio=0.8):
         super().__init__()
         inter_channels = max(1, in_channels // 2)
-        self.g     = nn.Conv2d(in_channels, inter_channels, 1, bias=False)
+        self.preserve_ratio = preserve_ratio  # 保留原始色彩的比例
+        
+        self.g = nn.Conv2d(in_channels, inter_channels, 1, bias=False)
         self.theta = nn.Conv2d(in_channels, inter_channels, 1, bias=False)
-        self.phi   = nn.Conv2d(in_channels, inter_channels, 1, bias=False)
-        self.W     = nn.Conv2d(inter_channels, in_channels, 1, bias=False)
-        nn.init.zeros_(self.W.weight)
+        self.phi = nn.Conv2d(in_channels, inter_channels, 1, bias=False)
+        self.W = nn.Conv2d(inter_channels, in_channels, 1, bias=False)
+        
+        # 修正：使用較小的初始化，而不是零初始化
+        nn.init.normal_(self.W.weight, std=0.02)
+        
+        # 添加色彩通道權重
+        self.color_gate = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(in_channels, in_channels//4, 1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels//4, in_channels, 1),
+            nn.Sigmoid()
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         B_, C, H, W = x.size()
         N = H * W
-        g_x     = self.g(x).view(B_, -1, N).permute(0, 2, 1)
+        
+        # 計算色彩權重
+        color_weight = self.color_gate(x)
+        
+        # 標準NonLocal計算
+        g_x = self.g(x).view(B_, -1, N).permute(0, 2, 1)
         theta_x = self.theta(x).view(B_, -1, N).permute(0, 2, 1)
-        phi_x   = self.phi(x).view(B_, -1, N)
+        phi_x = self.phi(x).view(B_, -1, N)
+        
         affinity = torch.matmul(theta_x, phi_x)
-        affinity = torch.softmax(affinity, dim=-1)
+        # 修正：使用溫度縮放softmax，減少過度平均化
+        temperature = 1.5  
+        affinity = torch.softmax(affinity / temperature, dim=-1)
+        
         y = torch.matmul(affinity, g_x)
         y = y.permute(0, 2, 1).contiguous().view(B_, -1, H, W)
         y = self.W(y)
+        
+        # 色彩保護：動態調整NonLocal的影響程度
+        y = y * color_weight * self.preserve_ratio
+        
         return x + y
 
 
@@ -68,7 +90,7 @@ class UNetRes(nn.Module):
         self.m_down3 = B.sequential(*[B.ResBlock(nc[2], nc[2], bias=bias, mode='C'+act_mode+'C') for _ in range(nb)], downsample_block(nc[2], nc[3], bias=bias, mode='2'))
 
         self.m_body  = B.sequential(*[B.ResBlock(nc[3], nc[3], bias=bias, mode='C'+act_mode+'C') for _ in range(nb)])
-        self.non_local = NonLocalBlock(nc[3])
+        self.non_local = ColorPreservingNonLocalBlock(nc[3])
         
         # upsample
         if upsample_mode == 'upconv':

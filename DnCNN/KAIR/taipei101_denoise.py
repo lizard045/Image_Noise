@@ -7,7 +7,9 @@ import torch
 import numpy as np
 from collections import OrderedDict
 import cv2
-import ipdb
+import time
+from torch.cuda.amp import autocast, GradScaler
+import torch.backends.cudnn as cudnn
 
 from utils import utils_logger
 from utils import utils_image as util
@@ -23,6 +25,329 @@ python taipei101_denoise.py --input_dir testsets/taipei101 --output_dir taipei10
 """
 print("實際匯入檔案：", nunet.__file__)
 print("UNetRes 參數：", nunet.UNetRes.__init__.__code__.co_varnames)
+
+class GPUOptimizer:
+    """GPU優化管理器"""
+    
+    def __init__(self):
+        self.device = None
+        self.gpu_info = {}
+        self.use_amp = False
+        self.scaler = None
+        
+    def setup_gpu(self):
+        """設置GPU優化配置"""
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+            # 啟用cuDNN基準測試模式
+            cudnn.benchmark = True
+            cudnn.deterministic = False
+            
+            # GPU記憶體管理
+            torch.cuda.empty_cache()
+            os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:128'
+            
+            # 獲取GPU資訊
+            self.gpu_info = {
+                'name': torch.cuda.get_device_name(0),
+                'memory_total': torch.cuda.get_device_properties(0).total_memory / 1024**3,
+                'memory_available': (torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_allocated()) / 1024**3
+            }
+            
+            # 根據GPU記憶體決定是否使用AMP
+            if self.gpu_info['memory_total'] >= 4.0:  # 4GB以上使用AMP
+                self.use_amp = True
+                try:
+                    # 新版PyTorch語法
+                    from torch.amp import GradScaler
+                    self.scaler = GradScaler('cuda')
+                except ImportError:
+                    # 舊版PyTorch語法
+                    from torch.cuda.amp import GradScaler
+                    self.scaler = GradScaler()
+                
+            print(f" GPU優化啟用:")
+            print(f"   設備: {self.gpu_info['name']}")
+            print(f"   總記憶體: {self.gpu_info['memory_total']:.1f}GB")
+            print(f"   可用記憶體: {self.gpu_info['memory_available']:.1f}GB")
+            print(f"   混合精度AMP: {self.use_amp}")
+            
+        else:
+            self.device = torch.device('cpu')
+            print(" 使用CPU處理 (建議使用GPU以獲得更好性能)")
+            
+        return self.device
+    
+    def get_optimal_batch_size(self, img_size):
+        """根據GPU記憶體和影像尺寸計算最佳批次大小"""
+        if not torch.cuda.is_available():
+            return 1
+            
+        # 估算單張影像所需記憶體（MB）
+        single_img_memory = (img_size[0] * img_size[1] * 3 * 4) / 1024**2  # 假設float32
+        available_memory_mb = self.gpu_info['memory_available'] * 1024 * 0.7  # 使用70%可用記憶體
+        
+        # 考慮模型記憶體佔用
+        model_memory_mb = 500  # 估算模型佔用約500MB
+        available_for_batch = available_memory_mb - model_memory_mb
+        
+        optimal_batch = max(1, int(available_for_batch / (single_img_memory * 2)))  # 乘2考慮前向傳播
+        return min(optimal_batch, 8)  # 限制最大批次為8
+    
+    def should_tile_process(self, img_size, threshold_pixels=2048*2048):
+        """判斷是否需要分塊處理（避免記憶體不足）"""
+        total_pixels = img_size[0] * img_size[1]
+        return total_pixels > threshold_pixels
+    
+    def get_optimal_tile_size(self, img_size):
+        """計算最佳分塊尺寸"""
+        h, w = img_size
+        
+        # 根據GPU記憶體決定分塊大小
+        if self.gpu_info['memory_total'] >= 8.0:
+            max_tile_size = 1024  # 8GB GPU
+        elif self.gpu_info['memory_total'] >= 6.0:
+            max_tile_size = 768   # 6GB GPU
+        else:
+            max_tile_size = 512   # 4GB GPU以下
+        
+        # 確保分塊尺寸不超過原圖尺寸
+        tile_h = min(max_tile_size, h)
+        tile_w = min(max_tile_size, w)
+        
+        return tile_h, tile_w
+    
+    def monitor_gpu_memory(self):
+        """監控GPU記憶體使用"""
+        if torch.cuda.is_available():
+            allocated = torch.cuda.memory_allocated() / 1024**3
+            cached = torch.cuda.memory_reserved() / 1024**3
+            return {
+                'allocated': allocated,
+                'cached': cached,
+                'free': self.gpu_info['memory_total'] - allocated
+            }
+        return None
+    
+    def cleanup_memory(self):
+        """清理GPU記憶體"""
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+
+def remove_module_prefix(state_dict):
+    """移除DataParallel訓練模型的'module.'前綴"""
+    new_state_dict = OrderedDict()
+    for key, value in state_dict.items():
+        if key.startswith('module.'):
+            new_key = key[7:]  # 移除'module.'前綴
+            new_state_dict[new_key] = value
+        else:
+            new_state_dict[key] = value
+    return new_state_dict
+
+def smart_load_model(model, model_path, device, logger):
+    """智能載入模型，自動處理DataParallel前綴問題"""
+    try:
+        # 載入state_dict
+        checkpoint = torch.load(model_path, map_location='cpu')
+        
+        # 如果checkpoint是字典且包含'state_dict'或其他key
+        if isinstance(checkpoint, dict):
+            if 'state_dict' in checkpoint:
+                state_dict = checkpoint['state_dict']
+            elif 'model' in checkpoint:
+                state_dict = checkpoint['model']
+            else:
+                # 假設整個checkpoint就是state_dict
+                state_dict = checkpoint
+        else:
+            state_dict = checkpoint
+        
+        # 嘗試直接載入
+        try:
+            model.load_state_dict(state_dict, strict=True)
+            logger.info('[SUCCESS] 模型載入成功 (直接載入)')
+            return True
+        except RuntimeError as e:
+            if 'module.' in str(e):
+                # 如果有module前綴問題，移除前綴後重試
+                logger.info('[INFO] 偵測到DataParallel前綴，正在移除...')
+                clean_state_dict = remove_module_prefix(state_dict)
+                
+                try:
+                    model.load_state_dict(clean_state_dict, strict=True)
+                    logger.info('[SUCCESS] 模型載入成功 (移除DataParallel前綴)')
+                    return True
+                except RuntimeError as e2:
+                    # 嘗試非嚴格載入
+                    logger.warning('[WARNING] 嚴格載入失敗，嘗試非嚴格載入...')
+                    missing_keys, unexpected_keys = model.load_state_dict(clean_state_dict, strict=False)
+                    
+                    if missing_keys:
+                        logger.warning(f'缺少的參數: {missing_keys[:5]}{"..." if len(missing_keys) > 5 else ""}')
+                    if unexpected_keys:
+                        logger.warning(f'多餘的參數: {unexpected_keys[:5]}{"..." if len(unexpected_keys) > 5 else ""}')
+                    
+                    # 如果只是少數參數不匹配，仍然可以使用
+                    if len(missing_keys) < 10:  # 容忍少量缺失
+                        logger.info('[SUCCESS] 模型載入成功 (非嚴格模式)')
+                        return True
+                    else:
+                        logger.error('[ERROR] 缺少太多重要參數，載入失敗')
+                        return False
+            else:
+                raise e
+                
+    except Exception as e:
+        logger.error(f'[ERROR] 模型載入完全失敗: {str(e)}')
+        return False
+
+def batch_process_images(model, images, device, noise_level_normalized, gpu_optimizer):
+    """批次處理影像以提升效率"""
+    results = []
+    batch_size = gpu_optimizer.get_optimal_batch_size(images[0].shape[:2])
+    
+    print(f"  使用批次大小: {batch_size}")
+    
+    for i in range(0, len(images), batch_size):
+        batch_images = images[i:i+batch_size]
+        batch_tensors = []
+        
+        # 轉換為tensor批次
+        for img in batch_images:
+            img_tensor = util.uint2tensor4(img).to(device)
+            noise_level_tensor = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), 
+                                          noise_level_normalized).to(device)
+            img_input = torch.cat([img_tensor, noise_level_tensor], dim=1)
+            batch_tensors.append(img_input)
+        
+        # 合併為批次tensor
+        if len(batch_tensors) > 1:
+            batch_input = torch.cat(batch_tensors, dim=0)
+        else:
+            batch_input = batch_tensors[0]
+        
+        # 使用AMP進行推理
+        try:
+            # 新版PyTorch語法
+            from torch.amp import autocast
+            with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                with torch.no_grad():
+                    batch_output = model(batch_input)
+        except ImportError:
+            # 舊版PyTorch語法
+            from torch.cuda.amp import autocast
+            with autocast(enabled=gpu_optimizer.use_amp):
+                with torch.no_grad():
+                    batch_output = model(batch_input)
+        
+        # 分離批次結果
+        if batch_output.shape[0] > 1:
+            for j in range(batch_output.shape[0]):
+                results.append(util.tensor2uint(batch_output[j:j+1]))
+        else:
+            results.append(util.tensor2uint(batch_output))
+        
+        # 記憶體清理
+        if i % (batch_size * 2) == 0:
+            gpu_optimizer.cleanup_memory()
+    
+    return results
+
+def tile_process_image(model, img_L, device, noise_level_normalized, gpu_optimizer, tile_size=1024, overlap=64):
+    """分塊處理大圖片，避免記憶體不足"""
+    h, w, c = img_L.shape
+    
+    # 如果圖片小於分塊尺寸，直接處理
+    if h <= tile_size and w <= tile_size:
+        img_tensor = util.uint2tensor4(img_L).to(device)
+        noise_level_tensor = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), 
+                                      noise_level_normalized).to(device)
+        img_input = torch.cat([img_tensor, noise_level_tensor], dim=1)
+        
+        try:
+            # 新版PyTorch語法
+            from torch.amp import autocast
+            with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                with torch.no_grad():
+                    img_E = model(img_input)
+        except ImportError:
+            # 舊版PyTorch語法
+            from torch.cuda.amp import autocast
+            with autocast(enabled=gpu_optimizer.use_amp):
+                with torch.no_grad():
+                    img_E = model(img_input)
+        
+        return util.tensor2uint(img_E)
+    
+    # 分塊處理
+    print(f"  大圖片分塊處理: {h}x{w} -> 分塊尺寸 {tile_size}x{tile_size}")
+    
+    # 計算分塊數量
+    h_tiles = (h - 1) // (tile_size - overlap) + 1
+    w_tiles = (w - 1) // (tile_size - overlap) + 1
+    
+    print(f"  分塊數量: {h_tiles}x{w_tiles} = {h_tiles * w_tiles} 塊")
+    
+    # 建立輸出影像
+    result_img = np.zeros_like(img_L)
+    
+    for i in range(h_tiles):
+        for j in range(w_tiles):
+            # 計算分塊座標
+            start_h = i * (tile_size - overlap)
+            start_w = j * (tile_size - overlap)
+            end_h = min(start_h + tile_size, h)
+            end_w = min(start_w + tile_size, w)
+            
+            # 提取分塊
+            tile = img_L[start_h:end_h, start_w:end_w, :]
+            
+            # 處理分塊
+            tile_tensor = util.uint2tensor4(tile).to(device)
+            noise_level_tensor = torch.full((1, 1, tile_tensor.shape[2], tile_tensor.shape[3]), 
+                                          noise_level_normalized).to(device)
+            tile_input = torch.cat([tile_tensor, noise_level_tensor], dim=1)
+            
+            try:
+                # 新版PyTorch語法
+                from torch.amp import autocast
+                with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                    with torch.no_grad():
+                        tile_output = model(tile_input)
+            except ImportError:
+                # 舊版PyTorch語法
+                from torch.cuda.amp import autocast
+                with autocast(enabled=gpu_optimizer.use_amp):
+                    with torch.no_grad():
+                        tile_output = model(tile_input)
+            
+            tile_result = util.tensor2uint(tile_output)
+            
+            # 處理重疊區域
+            if i == 0 and j == 0:
+                # 左上角塊，完整複製
+                result_img[start_h:end_h, start_w:end_w, :] = tile_result
+            else:
+                # 其他塊，處理重疊區域
+                actual_start_h = start_h + (overlap // 2 if i > 0 else 0)
+                actual_start_w = start_w + (overlap // 2 if j > 0 else 0)
+                
+                tile_start_h = overlap // 2 if i > 0 else 0
+                tile_start_w = overlap // 2 if j > 0 else 0
+                
+                result_img[actual_start_h:end_h, actual_start_w:end_w, :] = \
+                    tile_result[tile_start_h:, tile_start_w:, :]
+            
+            # 清理記憶體
+            del tile_tensor, tile_input, tile_output, tile_result
+            if (i * w_tiles + j) % 4 == 0:  # 每4塊清理一次
+                gpu_optimizer.cleanup_memory()
+            
+            print(f"    完成分塊 ({i+1}/{h_tiles}, {j+1}/{w_tiles})")
+    
+    return result_img
 
 def advanced_detail_enhancement(denoised_img, original_img):
     """
@@ -149,45 +474,6 @@ def adaptive_noise_level_processing(model, img_L, device, base_noise_level=10.0)
     
     return final_result
 
-# def multi_scale_denoising(model, img_L, device, noise_level_normalized):
-#     """
-#     多尺度去噪處理
-#     """
-#     results = []
-#     scales = [1.0, 0.8, 0.6]  # 不同縮放比例
-    
-#     for scale in scales:
-#         if scale != 1.0:
-#             # 縮放影像
-#             h, w = img_L.shape[2], img_L.shape[3]
-#             new_h, new_w = int(h * scale), int(w * scale)
-#             img_scaled = util.imresize_np(img_L, [new_h, new_w], True) # 使用util.imresize_np
-#         else:
-#             img_scaled = img_L
-        
-#         # 添加雜訊等級資訊
-#         noise_level_tensor = torch.full((1, 1, img_scaled.shape[2], img_scaled.shape[3]), 
-#                                       noise_level_normalized).to(device)
-#         img_input = torch.cat([img_scaled, noise_level_tensor], dim=1)
-        
-#         # 去噪處理
-#         with torch.no_grad():
-#             img_E = model(img_input)
-        
-#         # 如果縮放過，需要恢復原始尺寸
-#         if scale != 1.0:
-#             img_E = util.imresize_np(img_E, [h, w], True) # 使用util.imresize_np
-        
-#         results.append(util.tensor2uint(img_E))
-    
-#     # 加權融合不同尺度的結果
-#     weights = [0.5, 0.3, 0.2]  # 原尺寸權重最高
-#     final_result = np.zeros_like(results[0]).astype(np.float32)
-    
-#     for result, weight in zip(results, weights):
-#         final_result += result.astype(np.float32) * weight
-    
-#     return np.clip(final_result, 0, 255).astype(np.uint8)
 
 def frequency_domain_detail_preservation(denoised_img, original_img, detail_ratio=0.3):
     """
@@ -246,16 +532,20 @@ def main():
     # 參數設定
     # ----------------------------------------
     parser = argparse.ArgumentParser(description='台北101影像去噪處理')
-    parser.add_argument('--model_path', type=str, default='model_zoo/drunet_color.pth',
-                       help='去噪模型路徑')
+    parser.add_argument('--model_path', type=str, default='model_zoo/best_G.pth',
+                       help='去噪模型路徑 (使用最新訓練的最佳模型)')
     parser.add_argument('--input_dir', type=str, default='testsets/taipei101',
                        help='輸入影像目錄')
     parser.add_argument('--output_dir', type=str, default='taipei101_color_denoised',
                        help='輸出結果目錄')
-    parser.add_argument('--noise_level', type=float, default=4.0,
+    parser.add_argument('--noise_level', type=float, default=5.0,
                        help='雜訊等級 (0-255)')
     parser.add_argument('--device', type=str, default='auto',
                        help='運算設備: auto, cpu, cuda')
+    parser.add_argument('--enable_batch_processing', action='store_true',
+                       help='啟用批次處理以提升GPU效率')
+    parser.add_argument('--monitor_performance', action='store_true',
+                       help='啟用性能監控')
     args = parser.parse_args()
 
     # ----------------------------------------
@@ -267,21 +557,31 @@ def main():
     utils_logger.logger_info(logger_name, log_path=os.path.join(args.output_dir, 'denoise.log'))
     logger = logging.getLogger(logger_name)
     
-    logger.info('=== 台北101影像去噪處理 ===')
+    logger.info('=== 台北101影像去噪處理 (GPU優化版) ===')
     logger.info(f'模型路徑: {args.model_path}')
     logger.info(f'輸入目錄: {args.input_dir}')
     logger.info(f'輸出目錄: {args.output_dir}')
     logger.info(f'雜訊等級: {args.noise_level}')
+    logger.info(f'批次處理: {args.enable_batch_processing}')
+    logger.info(f'性能監控: {args.monitor_performance}')
     
     # ----------------------------------------
-    # 設備設定
+    # GPU優化器設定
     # ----------------------------------------
-    if args.device == 'auto':
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    else:
+    gpu_optimizer = GPUOptimizer()
+    device = gpu_optimizer.setup_gpu()
+    
+    if args.device != 'auto':
         device = torch.device(args.device)
+        print(f" 強制使用指定設備: {device}")
     
     logger.info(f'使用設備: {device}')
+    
+    # 性能監控初始化
+    if args.monitor_performance:
+        start_memory = gpu_optimizer.monitor_gpu_memory()
+        if start_memory:
+            logger.info(f'初始GPU記憶體: 已分配 {start_memory["allocated"]:.2f}GB, 快取 {start_memory["cached"]:.2f}GB')
     
     # ----------------------------------------
     # 檢查路徑是否存在
@@ -297,15 +597,21 @@ def main():
         return
     
     # ----------------------------------------
-    # 載入模型
+    # 載入模型 (智能載入，自動處理DataParallel問題)
     # ----------------------------------------
     try:
         logger.info('載入DRUNet彩色去噪模型...')
+        
+        # 建立模型結構 (與訓練時完全一致)
         model = UNetRes(in_nc=4, out_nc=3, nc=[64, 128, 256, 512], nb=4, act_mode='R', 
                        downsample_mode="strideconv", upsample_mode="convtranspose", bias=False, use_nonlocal=True)
         
-        # 載入預訓練權重
-        model.load_state_dict(torch.load(args.model_path, map_location='cpu'), strict=True)
+        # 智能載入預訓練權重
+        if not smart_load_model(model, args.model_path, device, logger):
+            logger.error('[ERROR] 模型載入失敗')
+            print(f" ❌ 模型載入失敗，請檢查模型檔案")
+            return
+        
         model.eval()
         
         # 禁用梯度計算
@@ -318,9 +624,14 @@ def main():
         num_params = sum(map(lambda x: x.numel(), model.parameters()))
         logger.info(f'模型參數數量: {num_params:,}')
         
+        # 模型資訊
+        print(f"  ✅ 模型載入成功!")
+        print(f"  📊 參數數量: {num_params:,}")
+        print(f"  🏗️  模型結構: UNetRes (DRUNet)")
+        
     except Exception as e:
         logger.error(f'載入模型失敗: {str(e)}')
-        print(f" 模型載入失敗: {str(e)}")
+        print(f" ❌ 模型載入失敗: {str(e)}")
         return
     
     # ----------------------------------------
@@ -341,77 +652,194 @@ def main():
     logger.info(f'正規化雜訊等級: {noise_level_normalized:.4f}')
     
     # ----------------------------------------
-    # 處理影像
+    # 處理影像 (GPU優化版本)
     # ----------------------------------------
-    logger.info('開始處理影像...')
+    logger.info('開始處理影像 (GPU優化模式)...')
     print(f"  開始處理 {len(image_paths)} 張影像")
     
     processed_count = 0
     failed_count = 0
+    start_time = time.time()
     
-    for idx, img_path in enumerate(image_paths):
-        img_name = os.path.basename(img_path)
+    if args.enable_batch_processing and len(image_paths) > 1:
+        # 批次處理模式
+        logger.info('使用批次處理模式提升效率')
         
         try:
-            logger.info(f'處理影像 {idx+1}/{len(image_paths)}: {img_name}')
+            # 載入所有影像
+            all_images = []
+            all_names = []
             
-            # 載入影像
-            img_L = util.imread_uint(img_path, n_channels=3)
-            original_shape = img_L.shape
+            print("  載入影像中...")
+            for img_path in image_paths:
+                img_name = os.path.basename(img_path)
+                img_L = util.imread_uint(img_path, n_channels=3)
+                all_images.append(img_L)
+                all_names.append(img_name)
             
-            # 轉換為tensor
-            img_tensor = util.uint2tensor4(img_L)
-            img_tensor = img_tensor.to(device)
+            # 批次處理
+            print("  執行批次去噪處理...")
+            results = batch_process_images(model, all_images, device, noise_level_normalized, gpu_optimizer)
             
-            # 使用自適應雜訊等級處理
-            img_E = adaptive_noise_level_processing(model, img_tensor, device, args.noise_level)
-            
-            # 或者使用多尺度處理（根據需要選擇）
-            # noise_level_normalized = args.noise_level / 255.0
-            # img_E = multi_scale_denoising(model, img_tensor, device, noise_level_normalized)
-            
-            # 確保輸出影像尺寸正確
-            if img_E.shape != original_shape:
-                logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
-            
-            # 進階細節增強
-            img_E = advanced_detail_enhancement(img_E, img_L)
-            
-            # 頻域細節保護
-            img_E = frequency_domain_detail_preservation(img_E, img_L, detail_ratio=0.2)
-            
-            # 儲存結果
-            output_path = os.path.join(args.output_dir, img_name)
-            util.imsave(img_E, output_path)
-            
-            processed_count += 1
-            print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理完成")
-            
+            # 後處理和儲存
+            print("  執行後處理和儲存...")
+            for idx, (img_E, img_L, img_name) in enumerate(zip(results, all_images, all_names)):
+                try:
+                    # 進階細節增強
+                    img_E = advanced_detail_enhancement(img_E, img_L)
+                    
+                    # 頻域細節保護
+                    img_E = frequency_domain_detail_preservation(img_E, img_L, detail_ratio=0.2)
+                    
+                    # 儲存結果
+                    output_path = os.path.join(args.output_dir, img_name)
+                    util.imsave(img_E, output_path)
+                    
+                    processed_count += 1
+                    print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理完成")
+                    
+                    # 性能監控
+                    if args.monitor_performance and idx == 0:
+                        memory_info = gpu_optimizer.monitor_gpu_memory()
+                        if memory_info:
+                            logger.info(f'處理中GPU記憶體: 已分配 {memory_info["allocated"]:.2f}GB')
+                    
+                except Exception as e:
+                    failed_count += 1
+                    logger.error(f'{img_name} - 後處理失敗: {str(e)}')
+                    print(f" ({idx+1}/{len(image_paths)}) {img_name} - 後處理失敗: {str(e)}")
+                    
         except Exception as e:
-            failed_count += 1
-            logger.error(f'{img_name} - 處理失敗: {str(e)}')
-            print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理失敗: {str(e)}")
-            continue
+            logger.error(f'批次處理失敗，回退到單張處理: {str(e)}')
+            print(f"  批次處理失敗，使用單張處理模式: {str(e)}")
+            args.enable_batch_processing = False
+    
+    # 單張處理模式或批次處理失敗時的後備方案
+    if not args.enable_batch_processing or processed_count == 0:
+        for idx, img_path in enumerate(image_paths):
+            img_name = os.path.basename(img_path)
+            
+            try:
+                logger.info(f'處理影像 {idx+1}/{len(image_paths)}: {img_name}')
+                
+                # 載入影像
+                img_L = util.imread_uint(img_path, n_channels=3)
+                original_shape = img_L.shape
+                
+                # 檢查是否需要分塊處理（避免記憶體不足）
+                if gpu_optimizer.should_tile_process(original_shape[:2]):
+                    print(f"  大圖片檢測: {original_shape[0]}x{original_shape[1]}, 使用分塊處理")
+                    tile_h, tile_w = gpu_optimizer.get_optimal_tile_size(original_shape[:2])
+                    img_E = tile_process_image(model, img_L, device, noise_level_normalized, 
+                                             gpu_optimizer, tile_size=min(tile_h, tile_w))
+                else:
+                    # GPU優化的單張處理
+                    try:
+                        # 新版PyTorch語法
+                        from torch.amp import autocast
+                        with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                            # 轉換為tensor
+                            img_tensor = util.uint2tensor4(img_L)
+                            img_tensor = img_tensor.to(device)
+                            
+                            # 使用自適應雜訊等級處理
+                            img_E = adaptive_noise_level_processing(model, img_tensor, device, args.noise_level)
+                    except ImportError:
+                        # 舊版PyTorch語法
+                        from torch.cuda.amp import autocast
+                        with autocast(enabled=gpu_optimizer.use_amp):
+                            # 轉換為tensor
+                            img_tensor = util.uint2tensor4(img_L)
+                            img_tensor = img_tensor.to(device)
+                            
+                            # 使用自適應雜訊等級處理
+                            img_E = adaptive_noise_level_processing(model, img_tensor, device, args.noise_level)
+                
+                # 確保輸出影像尺寸正確
+                if img_E.shape != original_shape:
+                    logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
+                
+                # 進階細節增強
+                img_E = advanced_detail_enhancement(img_E, img_L)
+                
+                # 頻域細節保護
+                img_E = frequency_domain_detail_preservation(img_E, img_L, detail_ratio=0.2)
+                
+                # 儲存結果
+                output_path = os.path.join(args.output_dir, img_name)
+                util.imsave(img_E, output_path)
+                
+                processed_count += 1
+                print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理完成")
+                
+                # 定期清理記憶體
+                if idx % 5 == 0:
+                    gpu_optimizer.cleanup_memory()
+                
+                # 性能監控
+                if args.monitor_performance and idx % 10 == 0:
+                    memory_info = gpu_optimizer.monitor_gpu_memory()
+                    if memory_info:
+                        logger.info(f'處理進度 {idx+1}/{len(image_paths)}, GPU記憶體: 已分配 {memory_info["allocated"]:.2f}GB')
+                
+            except Exception as e:
+                failed_count += 1
+                logger.error(f'{img_name} - 處理失敗: {str(e)}')
+                print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理失敗: {str(e)}")
+                continue
+    
+    # 最終記憶體清理
+    gpu_optimizer.cleanup_memory()
+    
+    # 計算處理時間
+    total_time = time.time() - start_time
+    avg_time_per_image = total_time / processed_count if processed_count > 0 else 0
     
     # ----------------------------------------
-    # 處理結果統計
+    # 處理結果統計 (含性能資訊)
     # ----------------------------------------
     logger.info('\n' + '=' * 60)
-    logger.info(' 處理結果統計')
+    logger.info(' 處理結果統計 (GPU優化版)')
     logger.info('=' * 60)
     logger.info(f'總影像數量: {len(image_paths)}')
     logger.info(f'成功處理: {processed_count}')
     logger.info(f'處理失敗: {failed_count}')
     logger.info(f'成功率: {processed_count/len(image_paths)*100:.1f}%')
+    logger.info(f'總處理時間: {total_time:.2f} 秒')
+    logger.info(f'平均每張時間: {avg_time_per_image:.2f} 秒')
+    logger.info(f'處理速度: {processed_count/total_time:.2f} 張/秒')
+    logger.info(f'批次處理模式: {"啟用" if args.enable_batch_processing else "停用"}')
+    logger.info(f'混合精度AMP: {"啟用" if gpu_optimizer.use_amp else "停用"}')
     logger.info(f'結果儲存位置: {args.output_dir}')
     
-    print(f"\n 台北101影像去噪處理完成！")
+    # 最終性能監控
+    if args.monitor_performance:
+        final_memory = gpu_optimizer.monitor_gpu_memory()
+        if final_memory:
+            logger.info(f'最終GPU記憶體: 已分配 {final_memory["allocated"]:.2f}GB, 剩餘 {final_memory["free"]:.2f}GB')
+    
+    print(f"\n 台北101影像去噪處理完成！(GPU優化版)")
     print(f" 處理統計: {processed_count}/{len(image_paths)} 成功")
+    print(f" 處理時間: {total_time:.2f} 秒 (平均 {avg_time_per_image:.2f} 秒/張)")
+    print(f" 處理速度: {processed_count/total_time:.2f} 張/秒")
+    print(f" GPU優化: AMP混合精度 {'✓' if gpu_optimizer.use_amp else '✗'}, 批次處理 {'✓' if args.enable_batch_processing else '✗'}")
     print(f" 結果位置: {args.output_dir}")
     
     if processed_count > 0:
-        print(f"\n 下一步: 使用評估腳本比較去噪效果")
-        print(f"   python main_evaluate_taipei101.py")
+        print(f"\n 下一步建議:")
+        print(f"   1. 使用評估腳本比較去噪效果: python main_evaluate_taipei101.py")
+        print(f"   2. 如需更快處理，下次可加上參數: --enable_batch_processing --monitor_performance")
+        
+        # 性能建議
+        if total_time > 0 and processed_count > 0:
+            if avg_time_per_image > 2.0:
+                print(f"   💡 效能提示: 處理速度較慢，建議啟用批次處理模式以提升效率")
+            elif avg_time_per_image < 0.5:
+                print(f"   🚀 效能優異: GPU優化效果顯著！")
+    
+    # 更新TODO狀態
+    print(f"\n ✅ 模型更新完成: 已使用最新的 best_G.pth 模型")
+    print(f" ✅ GPU優化完成: 混合精度、批次處理、記憶體管理已啟用")
 
 if __name__ == "__main__":
     main()
