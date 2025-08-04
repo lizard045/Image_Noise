@@ -15,6 +15,7 @@ from utils import utils_logger
 from utils import utils_image as util
 from models.network_unet import UNetRes
 import models.network_unet as nunet
+import torch.nn as nn
 """
 台北101影像去噪腳本
 使用DRUNet模型進行彩色影像去噪處理
@@ -156,6 +157,10 @@ def smart_load_model(model, model_path, device, logger):
         if isinstance(checkpoint, dict):
             if 'state_dict' in checkpoint:
                 state_dict = checkpoint['state_dict']
+            elif 'params' in checkpoint:
+                state_dict = checkpoint['params']
+            elif 'params_ema' in checkpoint:
+                state_dict = checkpoint['params_ema']
             elif 'model' in checkpoint:
                 state_dict = checkpoint['model']
             else:
@@ -203,60 +208,143 @@ def smart_load_model(model, model_path, device, logger):
         logger.error(f'[ERROR] 模型載入完全失敗: {str(e)}')
         return False
 
-def batch_process_images(model, images, device, noise_level_normalized, gpu_optimizer):
-    """批次處理影像以提升效率"""
-    results = []
-    batch_size = gpu_optimizer.get_optimal_batch_size(images[0].shape[:2])
-    
-    print(f"  使用批次大小: {batch_size}")
-    
-    for i in range(0, len(images), batch_size):
-        batch_images = images[i:i+batch_size]
-        batch_tensors = []
+def simple_dual_stream_processing(model, img_L, device, base_noise_level, gpu_optimizer):
+    """完全簡化的雙流處理，避免複雜函數調用"""
+    try:
+        # 確保輸入格式正確
+        if len(img_L.shape) == 2:
+            img_L = img_L[:, :, np.newaxis] 
+        elif len(img_L.shape) == 4:
+            img_L = img_L[0]
         
-        # 轉換為tensor批次
-        for img in batch_images:
-            img_tensor = util.uint2tensor4(img).to(device)
-            noise_level_tensor = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), 
-                                          noise_level_normalized).to(device)
-            img_input = torch.cat([img_tensor, noise_level_tensor], dim=1)
-            batch_tensors.append(img_input)
+        # 轉換為tensor
+        img_tensor = util.uint2tensor4(img_L).to(device)
         
-        # 合併為批次tensor
-        if len(batch_tensors) > 1:
-            batch_input = torch.cat(batch_tensors, dim=0)
-        else:
-            batch_input = batch_tensors[0]
+        # 設定雙噪聲等級
+        sigma_low = base_noise_level * 0.3   
+        sigma_high = base_noise_level * 1.5  
         
-        # 使用AMP進行推理
+        # Pass-1: 低噪聲等級處理
+        noise_level_low = sigma_low / 255.0
+        noise_tensor_low = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), 
+                                     noise_level_low).to(device)
+        img_input_low = torch.cat([img_tensor, noise_tensor_low], dim=1)
+        
+        with torch.no_grad():
+            try:
+                from torch.amp import autocast
+                with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                    o_low = model(img_input_low)
+            except ImportError:
+                from torch.cuda.amp import autocast
+                with autocast(enabled=gpu_optimizer.use_amp):
+                    o_low = model(img_input_low)
+        
+        # Pass-2: 高噪聲等級處理  
+        noise_level_high = sigma_high / 255.0
+        noise_tensor_high = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), 
+                                      noise_level_high).to(device)
+        img_input_high = torch.cat([img_tensor, noise_tensor_high], dim=1)
+        
+        with torch.no_grad():
+            try:
+                from torch.amp import autocast
+                with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                    o_high = model(img_input_high)
+            except ImportError:
+                from torch.cuda.amp import autocast
+                with autocast(enabled=gpu_optimizer.use_amp):
+                    o_high = model(img_input_high)
+        
+        # 轉換為numpy
+        o_low_np = util.tensor2uint(o_low)
+        o_high_np = util.tensor2uint(o_high)
+        
+        # 確保3維格式
+        if len(o_low_np.shape) == 2:
+            o_low_np = o_low_np[:, :, np.newaxis]
+        if len(o_high_np.shape) == 2:
+            o_high_np = o_high_np[:, :, np.newaxis]
+        
+        # 簡化的雙流融合（避免複雜函數調用）
         try:
-            # 新版PyTorch語法
-            from torch.amp import autocast
-            with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                with torch.no_grad():
-                    batch_output = model(batch_input)
-        except ImportError:
-            # 舊版PyTorch語法
-            from torch.cuda.amp import autocast
-            with autocast(enabled=gpu_optimizer.use_amp):
-                with torch.no_grad():
-                    batch_output = model(batch_input)
+            # 計算簡單的邊緣遮罩
+            if len(img_L.shape) == 3:
+                gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
+            else:
+                gray = img_L.squeeze()
+            
+            # 使用拉普拉斯算子
+            edge = cv2.Laplacian(gray.astype(np.float32), cv2.CV_32F, ksize=3)
+            edge_abs = np.abs(edge)
+            
+            # 簡化的閾值處理
+            edge_normalized = np.clip(edge_abs / (np.max(edge_abs) + 1e-6), 0, 1)
+            
+            # 擴展到彩色通道
+            if len(img_L.shape) == 3:
+                edge_mask_3d = edge_normalized[..., np.newaxis]
+            else:
+                edge_mask_3d = edge_normalized
+            
+            # 雙流融合
+            enhanced_result = edge_mask_3d * o_low_np.astype(np.float32) + (1 - edge_mask_3d) * o_high_np.astype(np.float32)
+            enhanced_result = np.clip(enhanced_result, 0, 255).astype(np.uint8)
+            
+        except Exception as fusion_e:
+            print(f"    邊緣融合失敗: {str(fusion_e)}, 使用簡單平均")
+            # 如果邊緣融合失敗，使用簡單平均
+            enhanced_result = ((o_low_np.astype(np.float32) + o_high_np.astype(np.float32)) / 2).astype(np.uint8)
         
-        # 分離批次結果
-        if batch_output.shape[0] > 1:
-            for j in range(batch_output.shape[0]):
-                results.append(util.tensor2uint(batch_output[j:j+1]))
-        else:
-            results.append(util.tensor2uint(batch_output))
+        # 清理記憶體
+        del img_tensor, img_input_low, img_input_high, o_low, o_high
+        gpu_optimizer.cleanup_memory()
         
-        # 記憶體清理
-        if i % (batch_size * 2) == 0:
-            gpu_optimizer.cleanup_memory()
-    
-    return results
+        return enhanced_result
+        
+    except Exception as e:
+        print(f"    雙流處理失敗: {str(e)}, 嘗試單流處理")
+        return fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer)
+
+def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer):
+    """後備單流處理方法"""
+    try:
+        img_tensor = util.uint2tensor4(img_L).to(device)
+        noise_level_normalized = base_noise_level / 255.0
+        noise_tensor = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), 
+                                 noise_level_normalized).to(device)
+        img_input = torch.cat([img_tensor, noise_tensor], dim=1)
+        
+        with torch.no_grad():
+            try:
+                from torch.amp import autocast
+                with autocast('cuda', enabled=gpu_optimizer.use_amp):
+                    img_output = model(img_input)
+            except ImportError:
+                from torch.cuda.amp import autocast
+                with autocast(enabled=gpu_optimizer.use_amp):
+                    img_output = model(img_input)
+        
+        result = util.tensor2uint(img_output)
+        
+        # 清理記憶體
+        del img_tensor, img_input, img_output
+        gpu_optimizer.cleanup_memory()
+        
+        return result
+        
+    except Exception as e:
+        print(f"    後備處理也失敗: {str(e)}, 返回原圖")
+        return img_L
 
 def tile_process_image(model, img_L, device, noise_level_normalized, gpu_optimizer, tile_size=1024, overlap=64):
     """分塊處理大圖片，避免記憶體不足"""
+    # 確保img_L是3維數組
+    if len(img_L.shape) == 2:
+        img_L = img_L[:, :, np.newaxis]  # 灰階轉3維
+    elif len(img_L.shape) == 4:
+        img_L = img_L[0]  # 移除batch維度
+    
     h, w, c = img_L.shape
     
     # 如果圖片小於分塊尺寸，直接處理
@@ -349,75 +437,200 @@ def tile_process_image(model, img_L, device, noise_level_normalized, gpu_optimiz
     
     return result_img
 
-def advanced_detail_enhancement(denoised_img, original_img):
+def tile_process_dual_stream(model, img_L, device, base_noise_level, gpu_optimizer, tile_size=1024, overlap=64):
     """
-    進階細節增強處理
+    分塊雙流處理大圖片，避免記憶體不足
     """
-    # 轉換為灰階分析
+    # 確保img_L是3維數組
+    if len(img_L.shape) == 2:
+        img_L = img_L[:, :, np.newaxis]  # 灰階轉3維
+    elif len(img_L.shape) == 4:
+        img_L = img_L[0]  # 移除batch維度
+    
+    h, w, c = img_L.shape
+    
+    # 如果圖片小於分塊尺寸，直接使用雙流處理
+    if h <= tile_size and w <= tile_size:
+        return simple_dual_stream_processing(model, img_L, device, base_noise_level, gpu_optimizer)
+    
+    # 分塊處理
+    print(f"  大圖片雙流分塊處理: {h}x{w} -> 分塊尺寸 {tile_size}x{tile_size}")
+    
+    # 計算分塊數量
+    h_tiles = (h - 1) // (tile_size - overlap) + 1
+    w_tiles = (w - 1) // (tile_size - overlap) + 1
+    
+    print(f"  分塊數量: {h_tiles}x{w_tiles} = {h_tiles * w_tiles} 塊")
+    
+    # 建立輸出影像
+    result_img = np.zeros_like(img_L)
+    
+    for i in range(h_tiles):
+        for j in range(w_tiles):
+            # 計算分塊座標
+            start_h = i * (tile_size - overlap)
+            start_w = j * (tile_size - overlap)
+            end_h = min(start_h + tile_size, h)
+            end_w = min(start_w + tile_size, w)
+            
+            # 提取分塊
+            tile = img_L[start_h:end_h, start_w:end_w, :]
+            
+            # 雙流處理分塊 (使用簡化處理)
+            tile_result = simple_dual_stream_processing(model, tile, device, base_noise_level, gpu_optimizer)
+            
+            # 處理重疊區域
+            if i == 0 and j == 0:
+                # 左上角塊，完整複製
+                result_img[start_h:end_h, start_w:end_w, :] = tile_result
+            else:
+                # 其他塊，處理重疊區域
+                actual_start_h = start_h + (overlap // 2 if i > 0 else 0)
+                actual_start_w = start_w + (overlap // 2 if j > 0 else 0)
+                
+                tile_start_h = overlap // 2 if i > 0 else 0
+                tile_start_w = overlap // 2 if j > 0 else 0
+                
+                result_img[actual_start_h:end_h, actual_start_w:end_w, :] = \
+                    tile_result[tile_start_h:, tile_start_w:, :]
+            
+            # 清理記憶體
+            del tile_result
+            if (i * w_tiles + j) % 4 == 0:  # 每4塊清理一次
+                gpu_optimizer.cleanup_memory()
+            
+            print(f"    完成雙流分塊 ({i+1}/{h_tiles}, {j+1}/{w_tiles})")
+    
+    return result_img
+
+def dual_stream_denoising(model, img_L_tensor, device, base_noise_level, gpu_optimizer):
+    """
+    雙流去噪處理：分離噪聲抑制和細節保留 (已棄用，請使用 simple_dual_stream_processing)
+    """
+    print("警告: dual_stream_denoising 函數已棄用，請使用 simple_dual_stream_processing")
+    # 轉換為numpy並使用新的處理函數
+    img_L_np = util.tensor2uint(img_L_tensor)
+    result = simple_dual_stream_processing(model, img_L_np, device, base_noise_level, gpu_optimizer)
+    return result, result, img_L_np  # 為了兼容性返回3個值，但實際只使用第一個
+
+def compute_edge_mask(img_gray, tau_ratio=0.3, M_ratio=0.8):
+    """
+    計算邊緣遮罩，邊緣越強權重越高
+    edge = cv2.Laplacian(gray, cv2.CV_32F, ksize=3)
+    edge_mask = np.clip((np.abs(edge) - τ) / (M - τ), 0, 1)
+    """
+    # 使用Laplacian算子檢測邊緣
+    edge = cv2.Laplacian(img_gray.astype(np.float32), cv2.CV_32F, ksize=3)
+    edge_abs = np.abs(edge)
+    
+    # 自適應閾值設定
+    tau = np.percentile(edge_abs, tau_ratio * 100)  # 30%分位數作為下閾值
+    M = np.percentile(edge_abs, M_ratio * 100)      # 80%分位數作為上閾值
+    
+    # 避免除零
+    if M - tau < 1e-6:
+        M = tau + 1e-6
+    
+    # 計算邊緣遮罩
+    edge_mask = np.clip((edge_abs - tau) / (M - tau), 0, 1)
+    
+    # 輕微平滑邊緣遮罩，避免突兀過渡
+    edge_mask = cv2.GaussianBlur(edge_mask, (3, 3), 0.5)
+    
+    return edge_mask
+
+def multiscale_residual_compensation(clean_base, original_img, k_factor=2.5):
+    """
+    多尺度殘差補償 (No-Train Plug-in)
+    使用小波變換保護高頻細節
+    """
+    try:
+        import pywt
+    except ImportError:
+        print("  警告: PyWavelets未安裝，跳過小波殘差補償")
+        print("  可執行: pip install PyWavelets 來啟用此功能")
+        return clean_base
+    
+    # 轉換為float32進行小波處理
+    orig_float = original_img.astype(np.float32) / 255.0
+    clean_float = clean_base.astype(np.float32) / 255.0
+    
+    result_channels = []
+    
+    # 對每個通道分別處理
+    for c in range(orig_float.shape[2] if len(orig_float.shape) == 3 else 1):
+        if len(orig_float.shape) == 3:
+            orig_ch = orig_float[:, :, c]
+            clean_ch = clean_float[:, :, c]
+        else:
+            orig_ch = orig_float
+            clean_ch = clean_float
+        
+        # 小波分解 (使用Stationary Wavelet Transform保持尺寸)
+        coeffs = pywt.swt2(orig_ch, 'haar', level=2)
+        
+        # 取最後一層的係數
+        clean_approx, details = coeffs[-1][0], coeffs[-1][1:]
+        
+        # 估計噪聲標準差 (使用高頻係數的中位數絕對偏差)
+        sigma_est = np.median(np.abs(details[0])) / 0.6745
+        
+        # 軟閾值處理：只壓抑小於閾值的高頻係數
+        threshold = k_factor * sigma_est
+        shrunk_details = []
+        
+        for detail in details:
+            # 軟閾值函數
+            shrunk = np.sign(detail) * np.maximum(np.abs(detail) - threshold, 0)
+            shrunk_details.append(shrunk)
+        
+        # 重建係數結構
+        new_coeffs = coeffs[:-1] + [(clean_approx, tuple(shrunk_details))]
+        
+        # 逆小波變換
+        restored = pywt.iswt2(new_coeffs, 'haar')
+        restored = np.clip(restored, 0, 1)
+        
+        result_channels.append(restored)
+    
+    # 重組通道
+    if len(orig_float.shape) == 3:
+        result = np.stack(result_channels, axis=2)
+    else:
+        result = result_channels[0]
+    
+    # 轉換回uint8
+    return (result * 255).astype(np.uint8)
+
+def advanced_dual_stream_enhancement(o_low, o_high, original_img):
+    """
+    進階雙流融合：結合邊緣遮罩和多尺度殘差補償
+    """
+    # 轉換為灰階計算邊緣遮罩
     if len(original_img.shape) == 3:
         gray_orig = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-        gray_denoised = cv2.cvtColor(denoised_img, cv2.COLOR_BGR2GRAY)
     else:
         gray_orig = original_img
-        gray_denoised = denoised_img
     
-    # 計算局部統計
-    kernel = np.ones((5, 5), np.float32) / 25
-    local_mean = cv2.filter2D(gray_orig.astype(np.float32), -1, kernel)
-    local_sqr_mean = cv2.filter2D((gray_orig.astype(np.float32))**2, -1, kernel)
-    local_var = local_sqr_mean - local_mean**2
+    # 計算邊緣遮罩
+    edge_mask = compute_edge_mask(gray_orig, tau_ratio=0.3, M_ratio=0.8)
     
-    # 計算梯度資訊
-    grad_x = cv2.Sobel(gray_orig, cv2.CV_64F, 1, 0, ksize=3)
-    grad_y = cv2.Sobel(gray_orig, cv2.CV_64F, 0, 1, ksize=3)
-    gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2)
+    # 擴展遮罩到彩色通道
+    if len(o_low.shape) == 3:
+        edge_mask_3d = edge_mask[..., np.newaxis]
+    else:
+        edge_mask_3d = edge_mask
     
-    # 建立不同區域的遮罩
-    high_var_threshold = np.percentile(local_var, 75)
-    high_brightness_threshold = np.percentile(local_mean, 80)
-    high_gradient_threshold = np.percentile(gradient_magnitude, 80)
+    # 雙流融合
+    fused_result = edge_mask_3d * o_low.astype(np.float32) + (1 - edge_mask_3d) * o_high.astype(np.float32)
+    fused_result = np.clip(fused_result, 0, 255).astype(np.uint8)
     
-    # 邊緣區域：保持更多原始細節
-    edge_mask = (local_var > high_var_threshold) & (gradient_magnitude > high_gradient_threshold)
+    # 多尺度殘差補償
+    final_result = multiscale_residual_compensation(fused_result, original_img, k_factor=2.5)
     
-    # 亮部區域：特別保護
-    bright_mask = local_mean > high_brightness_threshold
-    
-    result = denoised_img.copy().astype(np.float32)
-    
-    # 對邊緣區域恢復更多細節
-    if np.sum(edge_mask) > 0:
-        edge_weight = 0.75  # 增加邊緣細節權重
-        for i in range(denoised_img.shape[2] if len(denoised_img.shape) == 3 else 1):
-            if len(denoised_img.shape) == 3:
-                result[:, :, i][edge_mask] = (
-                    edge_weight * original_img[:, :, i][edge_mask] + 
-                    (1 - edge_weight) * denoised_img[:, :, i][edge_mask]
-                )
-            else:
-                result[edge_mask] = (
-                    edge_weight * original_img[edge_mask] + 
-                    (1 - edge_weight) * denoised_img[edge_mask]
-                )
-    
-    # 對亮部區域特別處理
-    if np.sum(bright_mask) > 0:
-        bright_weight = 0.6  # 亮部細節權重
-        for i in range(denoised_img.shape[2] if len(denoised_img.shape) == 3 else 1):
-            if len(denoised_img.shape) == 3:
-                result[:, :, i][bright_mask] = (
-                    bright_weight * original_img[:, :, i][bright_mask] + 
-                    (1 - bright_weight) * denoised_img[:, :, i][bright_mask]
-                )
-            else:
-                result[bright_mask] = (
-                    bright_weight * original_img[bright_mask] + 
-                    (1 - bright_weight) * denoised_img[bright_mask]
-                )
-    
-    return np.clip(result, 0, 255).astype(np.uint8)
+    return final_result, edge_mask
 
-def adaptive_noise_level_processing(model, img_L, device, base_noise_level=10.0):
+def adaptive_noise_level_processing(model, img_L, device, base_noise_level=5.0):
     """
     根據影像區域特性調整雜訊等級
     """
@@ -473,7 +686,6 @@ def adaptive_noise_level_processing(model, img_L, device, base_noise_level=10.0)
     final_result[medium_mask] = results[1][medium_mask]  # 中等雜訊等級
     
     return final_result
-
 
 def frequency_domain_detail_preservation(denoised_img, original_img, detail_ratio=0.3):
     """
@@ -532,18 +744,17 @@ def main():
     # 參數設定
     # ----------------------------------------
     parser = argparse.ArgumentParser(description='台北101影像去噪處理')
-    parser.add_argument('--model_path', type=str, default='model_zoo/best_G.pth',
-                       help='去噪模型路徑 (使用最新訓練的最佳模型)')
+    parser.add_argument('--drunet_model_path', type=str, default='model_zoo/drunet_color.pth',
+                       help='DRUNet去噪模型路徑 (本地精煉)')
     parser.add_argument('--input_dir', type=str, default='testsets/taipei101',
                        help='輸入影像目錄')
     parser.add_argument('--output_dir', type=str, default='taipei101_color_denoised',
                        help='輸出結果目錄')
-    parser.add_argument('--noise_level', type=float, default=5.0,
+    parser.add_argument('--noise_level', type=float, default=2.5,
                        help='雜訊等級 (0-255)')
     parser.add_argument('--device', type=str, default='auto',
                        help='運算設備: auto, cpu, cuda')
-    parser.add_argument('--enable_batch_processing', action='store_true',
-                       help='啟用批次處理以提升GPU效率')
+    # 已移除批次處理選項以提升穩定性
     parser.add_argument('--monitor_performance', action='store_true',
                        help='啟用性能監控')
     args = parser.parse_args()
@@ -557,13 +768,14 @@ def main():
     utils_logger.logger_info(logger_name, log_path=os.path.join(args.output_dir, 'denoise.log'))
     logger = logging.getLogger(logger_name)
     
-    logger.info('=== 台北101影像去噪處理 (GPU優化版) ===')
-    logger.info(f'模型路徑: {args.model_path}')
+    logger.info('=== 台北101影像去噪處理 (雙流分離方法) ===')
+    logger.info(f'DRUNet模型路徑: {args.drunet_model_path}')
     logger.info(f'輸入目錄: {args.input_dir}')
     logger.info(f'輸出目錄: {args.output_dir}')
-    logger.info(f'雜訊等級: {args.noise_level}')
-    logger.info(f'批次處理: {args.enable_batch_processing}')
+    logger.info(f'基礎雜訊等級: {args.noise_level}')
     logger.info(f'性能監控: {args.monitor_performance}')
+    logger.info('處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)')
+    logger.info('處理模式: 單張處理 (已移除批次處理以提升穩定性)')
     
     # ----------------------------------------
     # GPU優化器設定
@@ -586,9 +798,9 @@ def main():
     # ----------------------------------------
     # 檢查路徑是否存在
     # ----------------------------------------
-    if not os.path.exists(args.model_path):
-        logger.error(f'模型檔案不存在: {args.model_path}')
-        print(f" 錯誤: 找不到模型檔案 {args.model_path}")
+    if not os.path.exists(args.drunet_model_path):
+        logger.error(f'DRUNet模型檔案不存在: {args.drunet_model_path}')
+        print(f" 錯誤: 找不到DRUNet模型檔案 {args.drunet_model_path}")
         return
     
     if not os.path.exists(args.input_dir):
@@ -600,38 +812,36 @@ def main():
     # 載入模型 (智能載入，自動處理DataParallel問題)
     # ----------------------------------------
     try:
-        logger.info('載入DRUNet彩色去噪模型...')
+        logger.info('載入 DRUNet 去噪模型...')
         
-        # 建立模型結構 (與訓練時完全一致)
-        model = UNetRes(in_nc=4, out_nc=3, nc=[64, 128, 256, 512], nb=4, act_mode='R', 
-                       downsample_mode="strideconv", upsample_mode="convtranspose", bias=False, use_nonlocal=True)
+        # 載入純DRUNet模型
+        model = UNetRes(in_nc=4, out_nc=3, nc=[64, 128, 256, 512], nb=4,
+                        act_mode='R', downsample_mode='strideconv',
+                        upsample_mode='convtranspose', bias=False, use_nonlocal=True)
         
-        # 智能載入預訓練權重
-        if not smart_load_model(model, args.model_path, device, logger):
-            logger.error('[ERROR] 模型載入失敗')
-            print(f" ❌ 模型載入失敗，請檢查模型檔案")
+        if not smart_load_model(model, args.drunet_model_path, device, logger):
+            logger.error('[ERROR] DRUNet模型載入失敗')
+            print(f"  DRUNet模型載入失敗，請檢查模型檔案")
             return
         
-        model.eval()
+        model.to(device).eval()
         
         # 禁用梯度計算
         for k, v in model.named_parameters():
             v.requires_grad = False
         
-        model = model.to(device)
-        
         # 計算模型參數數量
-        num_params = sum(map(lambda x: x.numel(), model.parameters()))
-        logger.info(f'模型參數數量: {num_params:,}')
+        num_params = sum(p.numel() for p in model.parameters())
+        logger.info(f'DRUNet模型參數數量: {num_params:,}')
         
         # 模型資訊
-        print(f"  ✅ 模型載入成功!")
-        print(f"  📊 參數數量: {num_params:,}")
-        print(f"  🏗️  模型結構: UNetRes (DRUNet)")
+        print(f"   DRUNet模型載入成功!")
+        print(f"   參數數量: {num_params:,}")
+        print(f"   模型結構: UNetRes (純DRUNet)")
         
     except Exception as e:
         logger.error(f'載入模型失敗: {str(e)}')
-        print(f" ❌ 模型載入失敗: {str(e)}")
+        print(f"  模型載入失敗: {str(e)}")
         return
     
     # ----------------------------------------
@@ -661,132 +871,56 @@ def main():
     failed_count = 0
     start_time = time.time()
     
-    if args.enable_batch_processing and len(image_paths) > 1:
-        # 批次處理模式
-        logger.info('使用批次處理模式提升效率')
+    # 使用簡化的單張處理模式
+    print("  使用雙流單張處理模式 (已移除批次處理以提升穩定性)")
+    logger.info('使用雙流單張處理模式')
+    
+    for idx, img_path in enumerate(image_paths):
+        img_name = os.path.basename(img_path)
         
         try:
-            # 載入所有影像
-            all_images = []
-            all_names = []
+            logger.info(f'處理影像 {idx+1}/{len(image_paths)}: {img_name}')
             
-            print("  載入影像中...")
-            for img_path in image_paths:
-                img_name = os.path.basename(img_path)
-                img_L = util.imread_uint(img_path, n_channels=3)
-                all_images.append(img_L)
-                all_names.append(img_name)
+            # 載入影像
+            img_L = util.imread_uint(img_path, n_channels=3)
+            original_shape = img_L.shape
             
-            # 批次處理
-            print("  執行批次去噪處理...")
-            results = batch_process_images(model, all_images, device, noise_level_normalized, gpu_optimizer)
+            # 檢查是否需要分塊處理（避免記憶體不足）
+            if gpu_optimizer.should_tile_process(original_shape[:2]):
+                print(f"  大圖片檢測: {original_shape[0]}x{original_shape[1]}, 使用雙流分塊處理")
+                tile_h, tile_w = gpu_optimizer.get_optimal_tile_size(original_shape[:2])
+                img_E = tile_process_dual_stream(model, img_L, device, args.noise_level, 
+                                               gpu_optimizer, tile_size=min(tile_h, tile_w))
+            else:
+                # 使用簡化的雙流處理
+                img_E = simple_dual_stream_processing(model, img_L, device, args.noise_level, gpu_optimizer)
             
-            # 後處理和儲存
-            print("  執行後處理和儲存...")
-            for idx, (img_E, img_L, img_name) in enumerate(zip(results, all_images, all_names)):
-                try:
-                    # 進階細節增強
-                    img_E = advanced_detail_enhancement(img_E, img_L)
-                    
-                    # 頻域細節保護
-                    img_E = frequency_domain_detail_preservation(img_E, img_L, detail_ratio=0.2)
-                    
-                    # 儲存結果
-                    output_path = os.path.join(args.output_dir, img_name)
-                    util.imsave(img_E, output_path)
-                    
-                    processed_count += 1
-                    print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理完成")
-                    
-                    # 性能監控
-                    if args.monitor_performance and idx == 0:
-                        memory_info = gpu_optimizer.monitor_gpu_memory()
-                        if memory_info:
-                            logger.info(f'處理中GPU記憶體: 已分配 {memory_info["allocated"]:.2f}GB')
-                    
-                except Exception as e:
-                    failed_count += 1
-                    logger.error(f'{img_name} - 後處理失敗: {str(e)}')
-                    print(f" ({idx+1}/{len(image_paths)}) {img_name} - 後處理失敗: {str(e)}")
-                    
+            # 確保輸出影像尺寸正確
+            if img_E.shape != original_shape:
+                logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
+            
+            # 儲存結果
+            output_path = os.path.join(args.output_dir, img_name)
+            util.imsave(img_E, output_path)
+            
+            processed_count += 1
+            print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理完成")
+            
+            # 定期清理記憶體
+            if idx % 5 == 0:
+                gpu_optimizer.cleanup_memory()
+            
+            # 性能監控
+            if args.monitor_performance and idx % 10 == 0:
+                memory_info = gpu_optimizer.monitor_gpu_memory()
+                if memory_info:
+                    logger.info(f'處理進度 {idx+1}/{len(image_paths)}, GPU記憶體: 已分配 {memory_info["allocated"]:.2f}GB')
+            
         except Exception as e:
-            logger.error(f'批次處理失敗，回退到單張處理: {str(e)}')
-            print(f"  批次處理失敗，使用單張處理模式: {str(e)}")
-            args.enable_batch_processing = False
-    
-    # 單張處理模式或批次處理失敗時的後備方案
-    if not args.enable_batch_processing or processed_count == 0:
-        for idx, img_path in enumerate(image_paths):
-            img_name = os.path.basename(img_path)
-            
-            try:
-                logger.info(f'處理影像 {idx+1}/{len(image_paths)}: {img_name}')
-                
-                # 載入影像
-                img_L = util.imread_uint(img_path, n_channels=3)
-                original_shape = img_L.shape
-                
-                # 檢查是否需要分塊處理（避免記憶體不足）
-                if gpu_optimizer.should_tile_process(original_shape[:2]):
-                    print(f"  大圖片檢測: {original_shape[0]}x{original_shape[1]}, 使用分塊處理")
-                    tile_h, tile_w = gpu_optimizer.get_optimal_tile_size(original_shape[:2])
-                    img_E = tile_process_image(model, img_L, device, noise_level_normalized, 
-                                             gpu_optimizer, tile_size=min(tile_h, tile_w))
-                else:
-                    # GPU優化的單張處理
-                    try:
-                        # 新版PyTorch語法
-                        from torch.amp import autocast
-                        with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                            # 轉換為tensor
-                            img_tensor = util.uint2tensor4(img_L)
-                            img_tensor = img_tensor.to(device)
-                            
-                            # 使用自適應雜訊等級處理
-                            img_E = adaptive_noise_level_processing(model, img_tensor, device, args.noise_level)
-                    except ImportError:
-                        # 舊版PyTorch語法
-                        from torch.cuda.amp import autocast
-                        with autocast(enabled=gpu_optimizer.use_amp):
-                            # 轉換為tensor
-                            img_tensor = util.uint2tensor4(img_L)
-                            img_tensor = img_tensor.to(device)
-                            
-                            # 使用自適應雜訊等級處理
-                            img_E = adaptive_noise_level_processing(model, img_tensor, device, args.noise_level)
-                
-                # 確保輸出影像尺寸正確
-                if img_E.shape != original_shape:
-                    logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
-                
-                # 進階細節增強
-                img_E = advanced_detail_enhancement(img_E, img_L)
-                
-                # 頻域細節保護
-                img_E = frequency_domain_detail_preservation(img_E, img_L, detail_ratio=0.2)
-                
-                # 儲存結果
-                output_path = os.path.join(args.output_dir, img_name)
-                util.imsave(img_E, output_path)
-                
-                processed_count += 1
-                print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理完成")
-                
-                # 定期清理記憶體
-                if idx % 5 == 0:
-                    gpu_optimizer.cleanup_memory()
-                
-                # 性能監控
-                if args.monitor_performance and idx % 10 == 0:
-                    memory_info = gpu_optimizer.monitor_gpu_memory()
-                    if memory_info:
-                        logger.info(f'處理進度 {idx+1}/{len(image_paths)}, GPU記憶體: 已分配 {memory_info["allocated"]:.2f}GB')
-                
-            except Exception as e:
-                failed_count += 1
-                logger.error(f'{img_name} - 處理失敗: {str(e)}')
-                print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理失敗: {str(e)}")
-                continue
+            failed_count += 1
+            logger.error(f'{img_name} - 處理失敗: {str(e)}')
+            print(f" ({idx+1}/{len(image_paths)}) {img_name} - 處理失敗: {str(e)}")
+            continue
     
     # 最終記憶體清理
     gpu_optimizer.cleanup_memory()
@@ -808,7 +942,7 @@ def main():
     logger.info(f'總處理時間: {total_time:.2f} 秒')
     logger.info(f'平均每張時間: {avg_time_per_image:.2f} 秒')
     logger.info(f'處理速度: {processed_count/total_time:.2f} 張/秒')
-    logger.info(f'批次處理模式: {"啟用" if args.enable_batch_processing else "停用"}')
+    logger.info(f'處理模式: 單張處理 (已移除批次處理)')
     logger.info(f'混合精度AMP: {"啟用" if gpu_optimizer.use_amp else "停用"}')
     logger.info(f'結果儲存位置: {args.output_dir}')
     
@@ -818,28 +952,32 @@ def main():
         if final_memory:
             logger.info(f'最終GPU記憶體: 已分配 {final_memory["allocated"]:.2f}GB, 剩餘 {final_memory["free"]:.2f}GB')
     
-    print(f"\n 台北101影像去噪處理完成！(GPU優化版)")
+    print(f"\n 台北101影像去噪處理完成！(雙流分離方法)")
     print(f" 處理統計: {processed_count}/{len(image_paths)} 成功")
     print(f" 處理時間: {total_time:.2f} 秒 (平均 {avg_time_per_image:.2f} 秒/張)")
     print(f" 處理速度: {processed_count/total_time:.2f} 張/秒")
-    print(f" GPU優化: AMP混合精度 {'✓' if gpu_optimizer.use_amp else '✗'}, 批次處理 {'✓' if args.enable_batch_processing else '✗'}")
+    print(f" 方法特色: 雙流分離 (低噪保細節 + 高噪強去噪) + 拉普拉斯邊緣遮罩融合")
+    print(f" GPU優化: AMP混合精度 {'✓' if gpu_optimizer.use_amp else '✗'}, 單張處理模式 (穩定性優先)")
     print(f" 結果位置: {args.output_dir}")
     
     if processed_count > 0:
         print(f"\n 下一步建議:")
         print(f"   1. 使用評估腳本比較去噪效果: python main_evaluate_taipei101.py")
-        print(f"   2. 如需更快處理，下次可加上參數: --enable_batch_processing --monitor_performance")
+        print(f"   2. 可嘗試調整噪聲等級以獲得不同的細節保留效果")
+        print(f"   3. 如需監控GPU使用情況，可加上參數: --monitor_performance")
         
         # 性能建議
         if total_time > 0 and processed_count > 0:
             if avg_time_per_image > 2.0:
-                print(f"   💡 效能提示: 處理速度較慢，建議啟用批次處理模式以提升效率")
+                print(f"    效能提示: 處理速度較慢，可嘗試較小的噪聲等級或檢查GPU設定")
             elif avg_time_per_image < 0.5:
-                print(f"   🚀 效能優異: GPU優化效果顯著！")
+                print(f"    效能優異: 雙流方法 + GPU優化效果顯著!")
     
     # 更新TODO狀態
-    print(f"\n ✅ 模型更新完成: 已使用最新的 best_G.pth 模型")
-    print(f" ✅ GPU優化完成: 混合精度、批次處理、記憶體管理已啟用")
+    print(f"\n  雙流分離方法實現完成:")
+    print(f"    Pass-1: σ_low={args.noise_level * 0.3:.1f} (保細節)")
+    print(f"    Pass-2: σ_high={args.noise_level * 1.5:.1f} (強去噪)")
+    print(f"    融合: 拉普拉斯邊緣遮罩 + 小波殘差補償")
 
 if __name__ == "__main__":
     main()

@@ -176,3 +176,1010 @@
 25-08-01 09:55:20.848 : 批次處理模式: 停用
 25-08-01 09:55:20.848 : 混合精度AMP: 啟用
 25-08-01 09:55:20.848 : 結果儲存位置: taipei101_color_denoised
+25-08-01 11:31:11.265 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 11:31:11.265 : SwinIR模型路徑: model_zoo/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 11:31:11.265 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 11:31:11.265 : 輸入目錄: testsets/taipei101
+25-08-01 11:31:11.265 : 輸出目錄: taipei101_color_denoised
+25-08-01 11:31:11.265 : 雜訊等級: 5.0
+25-08-01 11:31:11.265 : 批次處理: False
+25-08-01 11:31:11.265 : 性能監控: False
+25-08-01 11:31:11.450 : 使用設備: cuda
+25-08-01 11:31:11.450 : SwinIR模型檔案不存在: model_zoo/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 11:32:08.825 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 11:32:08.825 : SwinIR模型路徑: model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 11:32:08.825 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 11:32:08.826 : 輸入目錄: testsets/taipei101
+25-08-01 11:32:08.826 : 輸出目錄: taipei101_color_denoised
+25-08-01 11:32:08.826 : 雜訊等級: 5.0
+25-08-01 11:32:08.826 : 批次處理: False
+25-08-01 11:32:08.826 : 性能監控: False
+25-08-01 11:32:08.883 : 使用設備: cuda
+25-08-01 11:32:08.883 : 載入SwinIR + DRUNet 混合去噪模型...
+25-08-01 11:32:08.907 : 載入模型失敗: shape '[1, 9, 7, 9, 7, 1]' is invalid for input of size 4096
+25-08-01 11:35:32.925 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 11:35:32.925 : SwinIR模型路徑: model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 11:35:32.925 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 11:35:32.926 : 輸入目錄: testsets/taipei101
+25-08-01 11:35:32.926 : 輸出目錄: taipei101_color_denoised
+25-08-01 11:35:32.926 : 雜訊等級: 5.0
+25-08-01 11:35:32.927 : 批次處理: False
+25-08-01 11:35:32.927 : 性能監控: False
+25-08-01 11:35:32.983 : 使用設備: cuda
+25-08-01 11:35:32.984 : 載入SwinIR + DRUNet 混合去噪模型...
+25-08-01 11:35:33.799 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 11:35:34.625 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 11:35:34.926 : 混合模型參數數量: 44,145,123
+25-08-01 11:35:34.936 : 找到影像檔案數量: 60
+25-08-01 11:35:34.936 : 正規化雜訊等級: 0.0196
+25-08-01 11:35:34.936 : 開始處理影像 (GPU優化模式)...
+25-08-01 11:35:34.937 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 11:39:25.869 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 11:48:52.816 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 11:48:52.817 : SwinIR模型路徑: model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 11:48:52.817 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 11:48:52.817 : 輸入目錄: testsets/taipei101
+25-08-01 11:48:52.817 : 輸出目錄: taipei101_color_denoised
+25-08-01 11:48:52.817 : 雜訊等級: 5.0
+25-08-01 11:48:52.817 : 批次處理: False
+25-08-01 11:48:52.818 : 性能監控: False
+25-08-01 11:48:52.872 : 使用設備: cuda
+25-08-01 11:48:52.872 : 載入SwinIR + DRUNet 混合去噪模型...
+25-08-01 11:48:53.491 : [ERROR] 模型載入完全失敗: Error(s) in loading state_dict for SwinIR:
+	size mismatch for layers.0.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.4.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.4.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.4.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.5.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.5.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.5.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.4.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.4.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.4.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.5.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.5.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.5.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.4.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.4.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.4.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.5.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.5.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.5.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.4.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.4.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.4.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.5.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.5.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.5.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.4.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.4.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.4.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.5.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.5.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.5.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.4.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.4.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.4.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.5.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.5.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.5.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+25-08-01 11:48:53.512 : [ERROR] SwinIR模型載入失敗
+25-08-01 13:24:02.965 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 13:24:02.965 : SwinIR模型路徑: model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 13:24:02.965 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 13:24:02.965 : 輸入目錄: testsets/taipei101
+25-08-01 13:24:02.965 : 輸出目錄: taipei101_color_denoised
+25-08-01 13:24:02.965 : 雜訊等級: 5.0
+25-08-01 13:24:02.965 : 批次處理: False
+25-08-01 13:24:02.981 : 性能監控: False
+25-08-01 13:24:03.102 : 使用設備: cuda
+25-08-01 13:24:03.102 : 載入SwinIR + DRUNet 混合去噪模型...
+25-08-01 13:24:03.690 : [WARNING] SwinIR 權重寬鬆載入失敗: Error(s) in loading state_dict for SwinIR:
+	size mismatch for layers.0.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.0.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.0.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.1.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.1.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.2.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.2.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.3.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.3.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.4.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.4.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.0.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.0.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.0.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.1.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.1.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.1.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.2.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.2.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.2.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.3.mlp.fc1.weight: copying a param with shape torch.Size([360, 180]) from checkpoint, the shape in current model is torch.Size([180, 180]).
+	size mismatch for layers.5.residual_group.blocks.3.mlp.fc1.bias: copying a param with shape torch.Size([360]) from checkpoint, the shape in current model is torch.Size([180]).
+	size mismatch for layers.5.residual_group.blocks.3.mlp.fc2.weight: copying a param with shape torch.Size([180, 360]) from checkpoint, the shape in current model is torch.Size([180, 180]).，將使用隨機初始化
+25-08-01 13:24:04.283 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 13:24:04.343 : 混合模型參數數量: 39,435,243
+25-08-01 13:24:04.353 : 找到影像檔案數量: 60
+25-08-01 13:24:04.353 : 正規化雜訊等級: 0.0196
+25-08-01 13:24:04.353 : 開始處理影像 (GPU優化模式)...
+25-08-01 13:24:04.354 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 13:27:28.786 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 13:33:30.550 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 13:44:06.149 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 13:44:06.149 : SwinIR模型路徑: model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 13:44:06.149 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 13:44:06.149 : 輸入目錄: testsets/taipei101
+25-08-01 13:44:06.150 : 輸出目錄: taipei101_color_denoised
+25-08-01 13:44:06.150 : 雜訊等級: 5.0
+25-08-01 13:44:06.150 : 批次處理: False
+25-08-01 13:44:06.150 : 性能監控: False
+25-08-01 13:44:06.204 : 使用設備: cuda
+25-08-01 13:44:06.205 : 載入SwinIR + DRUNet 混合去噪模型...
+25-08-01 13:44:07.040 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 13:44:07.639 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 13:44:07.700 : 混合模型參數數量: 44,145,123
+25-08-01 13:44:07.712 : 找到影像檔案數量: 60
+25-08-01 13:44:07.712 : 正規化雜訊等級: 0.0196
+25-08-01 13:44:07.712 : 開始處理影像 (GPU優化模式)...
+25-08-01 13:44:07.713 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 13:50:02.817 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 14:05:00.354 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 14:05:00.354 : SwinIR模型路徑: model_zoo/swinir/005_colorDN_DFWB_s128w8_SwinIR-M_noise15.pth
+25-08-01 14:05:00.354 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 14:05:00.354 : 輸入目錄: testsets/taipei101
+25-08-01 14:05:00.354 : 輸出目錄: taipei101_color_denoised
+25-08-01 14:05:00.355 : 雜訊等級: 15.0
+25-08-01 14:05:00.355 : 批次處理: False
+25-08-01 14:05:00.355 : 性能監控: False
+25-08-01 14:05:00.411 : 使用設備: cuda
+25-08-01 14:05:00.412 : 載入SwinIR + DRUNet 混合去噪模型...
+25-08-01 14:05:01.214 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 14:05:01.765 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 14:05:01.821 : 混合模型參數數量: 44,145,123
+25-08-01 14:05:01.831 : 找到影像檔案數量: 60
+25-08-01 14:05:01.831 : 正規化雜訊等級: 0.0588
+25-08-01 14:05:01.832 : 開始處理影像 (GPU優化模式)...
+25-08-01 14:05:01.832 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 14:08:46.850 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 14:30:10.518 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 14:30:10.518 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 14:30:10.518 : 輸入目錄: testsets/taipei101
+25-08-01 14:30:10.518 : 輸出目錄: taipei101_color_denoised
+25-08-01 14:30:10.518 : 雜訊等級: 15.0
+25-08-01 14:30:10.518 : 批次處理: False
+25-08-01 14:30:10.518 : 性能監控: False
+25-08-01 14:30:10.669 : 使用設備: cuda
+25-08-01 14:30:10.670 : 載入 DRUNet 混合去噪模型...
+25-08-01 14:30:10.901 : 載入模型失敗: 'Namespace' object has no attribute 'model_path'
+25-08-01 14:32:00.457 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 14:41:18.498 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 14:41:18.499 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 14:41:18.499 : 輸入目錄: testsets/taipei101
+25-08-01 14:41:18.499 : 輸出目錄: taipei101_color_denoised
+25-08-01 14:41:18.499 : 雜訊等級: 15.0
+25-08-01 14:41:18.500 : 批次處理: False
+25-08-01 14:41:18.500 : 性能監控: False
+25-08-01 14:41:18.562 : 使用設備: cuda
+25-08-01 14:41:18.562 : 載入 DRUNet 去噪模型...
+25-08-01 14:41:19.274 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 14:41:19.519 : DRUNet模型參數數量: 32,640,960
+25-08-01 14:41:19.530 : 找到影像檔案數量: 60
+25-08-01 14:41:19.531 : 正規化雜訊等級: 0.0588
+25-08-01 14:41:19.531 : 開始處理影像 (GPU優化模式)...
+25-08-01 14:41:19.532 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 14:41:33.903 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 14:41:43.474 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 14:41:50.865 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 14:41:58.512 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 14:42:06.302 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 14:42:14.598 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 14:43:06.511 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 14:43:06.511 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 14:43:06.511 : 輸入目錄: testsets/taipei101
+25-08-01 14:43:06.511 : 輸出目錄: taipei101_color_denoised
+25-08-01 14:43:06.512 : 雜訊等級: 3.0
+25-08-01 14:43:06.512 : 批次處理: False
+25-08-01 14:43:06.513 : 性能監控: False
+25-08-01 14:43:06.565 : 使用設備: cuda
+25-08-01 14:43:06.565 : 載入 DRUNet 去噪模型...
+25-08-01 14:43:06.887 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 14:43:07.134 : DRUNet模型參數數量: 32,640,960
+25-08-01 14:43:07.150 : 找到影像檔案數量: 60
+25-08-01 14:43:07.150 : 正規化雜訊等級: 0.0118
+25-08-01 14:43:07.150 : 開始處理影像 (GPU優化模式)...
+25-08-01 14:43:07.156 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 14:43:19.604 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 14:43:26.907 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 14:43:34.234 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 14:43:41.744 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 14:43:49.228 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 14:43:56.540 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 14:44:03.800 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-01 14:44:11.040 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-01 14:44:18.393 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-01 14:44:26.228 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-01 14:44:33.584 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-01 14:44:41.752 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-01 14:44:54.018 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-01 14:45:09.369 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-01 14:45:17.364 : 處理影像 16/60: A023_C009_0101VU_016_1752113492.png
+25-08-01 14:45:25.199 : 處理影像 17/60: A023_C009_0101VU_017_1752113493.png
+25-08-01 14:45:33.054 : 處理影像 18/60: A023_C009_0101VU_018_1752113494.png
+25-08-01 14:45:40.307 : 處理影像 19/60: A023_C009_0101VU_019_1752113494.png
+25-08-01 14:45:47.699 : 處理影像 20/60: A023_C009_0101VU_020_1752113495.png
+25-08-01 14:45:55.114 : 處理影像 21/60: A023_C009_0101VU_021_1752113496.png
+25-08-01 14:46:02.492 : 處理影像 22/60: A023_C009_0101VU_022_1752113496.png
+25-08-01 14:46:09.884 : 處理影像 23/60: A023_C009_0101VU_023_1752113497.png
+25-08-01 14:46:18.034 : 處理影像 24/60: A023_C009_0101VU_024_1752113498.png
+25-08-01 14:46:26.675 : 處理影像 25/60: A023_C009_0101VU_025_1752113498.png
+25-08-01 14:46:34.048 : 處理影像 26/60: A023_C009_0101VU_026_1752113499.png
+25-08-01 14:46:41.887 : 處理影像 27/60: A023_C009_0101VU_027_1752113500.png
+25-08-01 14:46:49.735 : 處理影像 28/60: A023_C009_0101VU_028_1752113500.png
+25-08-01 14:46:57.746 : 處理影像 29/60: A023_C009_0101VU_029_1752113501.png
+25-08-01 14:47:06.071 : 處理影像 30/60: A023_C009_0101VU_030_1752113502.png
+25-08-01 14:47:13.979 : 處理影像 31/60: A023_C009_0101VU_031_1752113502.png
+25-08-01 14:47:21.844 : 處理影像 32/60: A023_C009_0101VU_032_1752113503.png
+25-08-01 14:47:29.820 : 處理影像 33/60: A023_C009_0101VU_033_1752113504.png
+25-08-01 14:47:38.019 : 處理影像 34/60: A023_C009_0101VU_034_1752113504.png
+25-08-01 14:47:45.719 : 處理影像 35/60: A023_C009_0101VU_035_1752113505.png
+25-08-01 14:47:53.754 : 處理影像 36/60: A023_C009_0101VU_036_1752113506.png
+25-08-01 14:48:09.242 : 處理影像 37/60: A023_C009_0101VU_037_1752113506.png
+25-08-01 14:48:20.125 : 處理影像 38/60: A023_C009_0101VU_038_1752113507.png
+25-08-01 14:48:28.280 : 處理影像 39/60: A023_C009_0101VU_039_1752113508.png
+25-08-01 14:48:36.216 : 處理影像 40/60: A023_C009_0101VU_040_1752113508.png
+25-08-01 14:48:44.319 : 處理影像 41/60: A023_C009_0101VU_041_1752113509.png
+25-08-01 14:48:52.184 : 處理影像 42/60: A023_C009_0101VU_042_1752113510.png
+25-08-01 14:49:00.123 : 處理影像 43/60: A023_C009_0101VU_043_1752113510.png
+25-08-01 14:49:07.895 : 處理影像 44/60: A023_C009_0101VU_044_1752113511.png
+25-08-01 14:49:16.146 : 處理影像 45/60: A023_C009_0101VU_045_1752113512.png
+25-08-01 14:49:24.756 : 處理影像 46/60: A023_C009_0101VU_046_1752113512.png
+25-08-01 14:49:32.939 : 處理影像 47/60: A023_C009_0101VU_047_1752113513.png
+25-08-01 14:49:40.832 : 處理影像 48/60: A023_C009_0101VU_048_1752113514.png
+25-08-01 14:49:49.064 : 處理影像 49/60: A023_C009_0101VU_049_1752113514.png
+25-08-01 14:49:56.787 : 處理影像 50/60: A023_C009_0101VU_050_1752113515.png
+25-08-01 14:50:04.452 : 處理影像 51/60: A023_C009_0101VU_051_1752113516.png
+25-08-01 14:50:12.671 : 處理影像 52/60: A023_C009_0101VU_052_1752113516.png
+25-08-01 14:50:21.270 : 處理影像 53/60: A023_C009_0101VU_053_1752113517.png
+25-08-01 14:50:29.639 : 處理影像 54/60: A023_C009_0101VU_054_1752113518.png
+25-08-01 14:50:37.772 : 處理影像 55/60: A023_C009_0101VU_055_1752113518.png
+25-08-01 14:50:46.153 : 處理影像 56/60: A023_C009_0101VU_056_1752113519.png
+25-08-01 14:50:54.249 : 處理影像 57/60: A023_C009_0101VU_057_1752113520.png
+25-08-01 14:51:01.975 : 處理影像 58/60: A023_C009_0101VU_058_1752113520.png
+25-08-01 14:51:16.251 : 處理影像 59/60: A023_C009_0101VU_059_1752113521.png
+25-08-01 14:51:28.612 : 處理影像 60/60: A023_C009_0101VU_060_1752113522.png
+25-08-01 14:51:36.645 : 
+============================================================
+25-08-01 14:51:36.646 :  處理結果統計 (GPU優化版)
+25-08-01 14:51:36.646 : ============================================================
+25-08-01 14:51:36.646 : 總影像數量: 60
+25-08-01 14:51:36.646 : 成功處理: 60
+25-08-01 14:51:36.647 : 處理失敗: 0
+25-08-01 14:51:36.647 : 成功率: 100.0%
+25-08-01 14:51:36.647 : 總處理時間: 509.49 秒
+25-08-01 14:51:36.647 : 平均每張時間: 8.49 秒
+25-08-01 14:51:36.648 : 處理速度: 0.12 張/秒
+25-08-01 14:51:36.648 : 批次處理模式: 停用
+25-08-01 14:51:36.648 : 混合精度AMP: 啟用
+25-08-01 14:51:36.648 : 結果儲存位置: taipei101_color_denoised
+25-08-01 14:54:23.684 : === 台北101影像去噪處理 (GPU優化版) ===
+25-08-01 14:54:23.748 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 14:54:23.893 : 輸入目錄: testsets/taipei101
+25-08-01 14:54:23.981 : 輸出目錄: taipei101_color_denoised
+25-08-01 14:54:24.049 : 雜訊等級: 5.0
+25-08-01 14:54:24.122 : 批次處理: False
+25-08-01 14:54:24.172 : 性能監控: False
+25-08-01 14:54:24.454 : 使用設備: cuda
+25-08-01 14:54:24.455 : 載入 DRUNet 去噪模型...
+25-08-01 14:54:27.596 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 14:54:29.189 : DRUNet模型參數數量: 32,640,960
+25-08-01 14:54:29.224 : 找到影像檔案數量: 60
+25-08-01 14:54:29.231 : 正規化雜訊等級: 0.0196
+25-08-01 14:54:29.232 : 開始處理影像 (GPU優化模式)...
+25-08-01 14:54:29.234 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 14:54:45.957 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 14:54:54.336 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 14:55:02.516 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 14:55:10.794 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 14:55:19.386 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 14:55:27.765 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 14:55:35.418 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-01 14:55:43.353 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-01 14:55:51.704 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-01 14:56:00.114 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-01 14:56:08.187 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-01 14:56:16.700 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-01 14:56:25.035 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-01 14:56:33.018 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-01 14:56:40.561 : 處理影像 16/60: A023_C009_0101VU_016_1752113492.png
+25-08-01 14:56:48.614 : 處理影像 17/60: A023_C009_0101VU_017_1752113493.png
+25-08-01 14:56:57.226 : 處理影像 18/60: A023_C009_0101VU_018_1752113494.png
+25-08-01 14:57:05.693 : 處理影像 19/60: A023_C009_0101VU_019_1752113494.png
+25-08-01 14:57:14.237 : 處理影像 20/60: A023_C009_0101VU_020_1752113495.png
+25-08-01 14:57:26.056 : 處理影像 21/60: A023_C009_0101VU_021_1752113496.png
+25-08-01 14:57:39.392 : 處理影像 22/60: A023_C009_0101VU_022_1752113496.png
+25-08-01 14:57:49.681 : 處理影像 23/60: A023_C009_0101VU_023_1752113497.png
+25-08-01 14:57:58.581 : 處理影像 24/60: A023_C009_0101VU_024_1752113498.png
+25-08-01 14:58:08.708 : 處理影像 25/60: A023_C009_0101VU_025_1752113498.png
+25-08-01 14:58:16.894 : 處理影像 26/60: A023_C009_0101VU_026_1752113499.png
+25-08-01 14:58:24.635 : 處理影像 27/60: A023_C009_0101VU_027_1752113500.png
+25-08-01 14:58:32.518 : 處理影像 28/60: A023_C009_0101VU_028_1752113500.png
+25-08-01 14:58:40.810 : 處理影像 29/60: A023_C009_0101VU_029_1752113501.png
+25-08-01 14:58:48.605 : 處理影像 30/60: A023_C009_0101VU_030_1752113502.png
+25-08-01 14:58:56.321 : 處理影像 31/60: A023_C009_0101VU_031_1752113502.png
+25-08-01 14:59:03.936 : 處理影像 32/60: A023_C009_0101VU_032_1752113503.png
+25-08-01 14:59:11.385 : 處理影像 33/60: A023_C009_0101VU_033_1752113504.png
+25-08-01 15:29:03.567 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 15:29:03.576 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 15:29:03.576 : 輸入目錄: testsets/taipei101
+25-08-01 15:29:03.576 : 輸出目錄: taipei101_color_denoised
+25-08-01 15:29:03.576 : 基礎雜訊等級: 5.0
+25-08-01 15:29:03.576 : 批次處理: False
+25-08-01 15:29:03.576 : 性能監控: False
+25-08-01 15:29:03.576 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 15:29:03.745 : 使用設備: cuda
+25-08-01 15:29:03.745 : 載入 DRUNet 去噪模型...
+25-08-01 15:29:04.107 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 15:29:04.357 : DRUNet模型參數數量: 32,640,960
+25-08-01 15:29:04.367 : 找到影像檔案數量: 60
+25-08-01 15:29:04.367 : 正規化雜訊等級: 0.0196
+25-08-01 15:29:04.367 : 開始處理影像 (GPU優化模式)...
+25-08-01 15:29:04.367 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 15:29:07.142 : A023_C009_0101VU_001_1752113482.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:07.155 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 15:29:08.447 : A023_C009_0101VU_002_1752113483.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:08.568 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 15:29:09.702 : A023_C009_0101VU_003_1752113484.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:09.803 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 15:29:11.704 : A023_C009_0101VU_004_1752113484.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:11.827 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 15:29:13.452 : A023_C009_0101VU_005_1752113485.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:13.613 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 15:29:15.767 : A023_C009_0101VU_006_1752113486.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:15.913 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 15:29:17.336 : A023_C009_0101VU_007_1752113486.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:17.449 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-01 15:29:19.029 : A023_C009_0101VU_008_1752113487.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:19.073 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-01 15:29:20.342 : A023_C009_0101VU_009_1752113488.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:20.353 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-01 15:29:21.311 : A023_C009_0101VU_010_1752113488.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:21.408 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-01 15:29:22.591 : A023_C009_0101VU_011_1752113489.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:22.651 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-01 15:29:24.302 : A023_C009_0101VU_012_1752113490.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:24.311 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-01 15:29:24.989 : A023_C009_0101VU_013_1752113490.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:24.997 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-01 15:29:25.687 : A023_C009_0101VU_014_1752113491.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:25.693 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-01 15:29:26.380 : A023_C009_0101VU_015_1752113492.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:26.386 : 處理影像 16/60: A023_C009_0101VU_016_1752113492.png
+25-08-01 15:29:27.078 : A023_C009_0101VU_016_1752113492.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:27.085 : 處理影像 17/60: A023_C009_0101VU_017_1752113493.png
+25-08-01 15:29:27.799 : A023_C009_0101VU_017_1752113493.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:27.806 : 處理影像 18/60: A023_C009_0101VU_018_1752113494.png
+25-08-01 15:29:28.492 : A023_C009_0101VU_018_1752113494.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:28.498 : 處理影像 19/60: A023_C009_0101VU_019_1752113494.png
+25-08-01 15:29:29.187 : A023_C009_0101VU_019_1752113494.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:29.195 : 處理影像 20/60: A023_C009_0101VU_020_1752113495.png
+25-08-01 15:29:29.886 : A023_C009_0101VU_020_1752113495.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:29.893 : 處理影像 21/60: A023_C009_0101VU_021_1752113496.png
+25-08-01 15:29:30.580 : A023_C009_0101VU_021_1752113496.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:30.587 : 處理影像 22/60: A023_C009_0101VU_022_1752113496.png
+25-08-01 15:29:31.266 : A023_C009_0101VU_022_1752113496.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:31.272 : 處理影像 23/60: A023_C009_0101VU_023_1752113497.png
+25-08-01 15:29:31.943 : A023_C009_0101VU_023_1752113497.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:31.949 : 處理影像 24/60: A023_C009_0101VU_024_1752113498.png
+25-08-01 15:29:32.642 : A023_C009_0101VU_024_1752113498.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:32.648 : 處理影像 25/60: A023_C009_0101VU_025_1752113498.png
+25-08-01 15:29:33.332 : A023_C009_0101VU_025_1752113498.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:33.338 : 處理影像 26/60: A023_C009_0101VU_026_1752113499.png
+25-08-01 15:29:34.013 : A023_C009_0101VU_026_1752113499.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:34.017 : 處理影像 27/60: A023_C009_0101VU_027_1752113500.png
+25-08-01 15:29:34.703 : A023_C009_0101VU_027_1752113500.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:34.709 : 處理影像 28/60: A023_C009_0101VU_028_1752113500.png
+25-08-01 15:29:35.468 : A023_C009_0101VU_028_1752113500.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:35.475 : 處理影像 29/60: A023_C009_0101VU_029_1752113501.png
+25-08-01 15:29:36.221 : A023_C009_0101VU_029_1752113501.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:36.228 : 處理影像 30/60: A023_C009_0101VU_030_1752113502.png
+25-08-01 15:29:36.983 : A023_C009_0101VU_030_1752113502.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:36.990 : 處理影像 31/60: A023_C009_0101VU_031_1752113502.png
+25-08-01 15:29:37.683 : A023_C009_0101VU_031_1752113502.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:37.688 : 處理影像 32/60: A023_C009_0101VU_032_1752113503.png
+25-08-01 15:29:38.379 : A023_C009_0101VU_032_1752113503.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:29:38.385 : 處理影像 33/60: A023_C009_0101VU_033_1752113504.png
+25-08-01 15:57:11.865 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 15:57:11.865 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 15:57:11.866 : 輸入目錄: testsets/taipei101
+25-08-01 15:57:11.866 : 輸出目錄: taipei101_color_denoised
+25-08-01 15:57:11.866 : 基礎雜訊等級: 5.0
+25-08-01 15:57:11.866 : 批次處理: False
+25-08-01 15:57:11.866 : 性能監控: False
+25-08-01 15:57:11.866 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 15:57:11.923 : 使用設備: cuda
+25-08-01 15:57:11.923 : 載入 DRUNet 去噪模型...
+25-08-01 15:57:12.267 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 15:57:12.498 : DRUNet模型參數數量: 32,640,960
+25-08-01 15:57:12.508 : 找到影像檔案數量: 60
+25-08-01 15:57:12.508 : 正規化雜訊等級: 0.0196
+25-08-01 15:57:12.509 : 開始處理影像 (GPU優化模式)...
+25-08-01 15:57:12.509 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 15:57:14.945 : A023_C009_0101VU_001_1752113482.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:14.951 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 15:57:15.650 : A023_C009_0101VU_002_1752113483.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:15.656 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 15:57:16.338 : A023_C009_0101VU_003_1752113484.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:16.344 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 15:57:17.034 : A023_C009_0101VU_004_1752113484.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:17.040 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 15:57:17.720 : A023_C009_0101VU_005_1752113485.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:17.727 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 15:57:18.407 : A023_C009_0101VU_006_1752113486.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:18.414 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 15:57:19.082 : A023_C009_0101VU_007_1752113486.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:19.090 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-01 15:57:19.811 : A023_C009_0101VU_008_1752113487.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:19.818 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-01 15:57:20.528 : A023_C009_0101VU_009_1752113488.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:20.535 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-01 15:57:21.225 : A023_C009_0101VU_010_1752113488.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:21.232 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-01 15:57:21.916 : A023_C009_0101VU_011_1752113489.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:21.923 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-01 15:57:22.596 : A023_C009_0101VU_012_1752113490.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:22.601 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-01 15:57:23.283 : A023_C009_0101VU_013_1752113490.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:23.290 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-01 15:57:23.982 : A023_C009_0101VU_014_1752113491.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:23.988 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-01 15:57:24.668 : A023_C009_0101VU_015_1752113492.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:24.674 : 處理影像 16/60: A023_C009_0101VU_016_1752113492.png
+25-08-01 15:57:25.365 : A023_C009_0101VU_016_1752113492.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:25.371 : 處理影像 17/60: A023_C009_0101VU_017_1752113493.png
+25-08-01 15:57:26.063 : A023_C009_0101VU_017_1752113493.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:26.069 : 處理影像 18/60: A023_C009_0101VU_018_1752113494.png
+25-08-01 15:57:26.745 : A023_C009_0101VU_018_1752113494.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:26.752 : 處理影像 19/60: A023_C009_0101VU_019_1752113494.png
+25-08-01 15:57:27.437 : A023_C009_0101VU_019_1752113494.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:27.444 : 處理影像 20/60: A023_C009_0101VU_020_1752113495.png
+25-08-01 15:57:28.115 : A023_C009_0101VU_020_1752113495.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:28.121 : 處理影像 21/60: A023_C009_0101VU_021_1752113496.png
+25-08-01 15:57:28.794 : A023_C009_0101VU_021_1752113496.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:28.800 : 處理影像 22/60: A023_C009_0101VU_022_1752113496.png
+25-08-01 15:57:29.499 : A023_C009_0101VU_022_1752113496.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:29.506 : 處理影像 23/60: A023_C009_0101VU_023_1752113497.png
+25-08-01 15:57:30.185 : A023_C009_0101VU_023_1752113497.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:30.192 : 處理影像 24/60: A023_C009_0101VU_024_1752113498.png
+25-08-01 15:57:30.922 : A023_C009_0101VU_024_1752113498.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:30.928 : 處理影像 25/60: A023_C009_0101VU_025_1752113498.png
+25-08-01 15:57:31.609 : A023_C009_0101VU_025_1752113498.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:31.616 : 處理影像 26/60: A023_C009_0101VU_026_1752113499.png
+25-08-01 15:57:32.294 : A023_C009_0101VU_026_1752113499.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:32.301 : 處理影像 27/60: A023_C009_0101VU_027_1752113500.png
+25-08-01 15:57:32.981 : A023_C009_0101VU_027_1752113500.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:32.988 : 處理影像 28/60: A023_C009_0101VU_028_1752113500.png
+25-08-01 15:57:33.664 : A023_C009_0101VU_028_1752113500.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:33.671 : 處理影像 29/60: A023_C009_0101VU_029_1752113501.png
+25-08-01 15:57:34.364 : A023_C009_0101VU_029_1752113501.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:34.371 : 處理影像 30/60: A023_C009_0101VU_030_1752113502.png
+25-08-01 15:57:35.055 : A023_C009_0101VU_030_1752113502.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:35.061 : 處理影像 31/60: A023_C009_0101VU_031_1752113502.png
+25-08-01 15:57:35.749 : A023_C009_0101VU_031_1752113502.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:35.756 : 處理影像 32/60: A023_C009_0101VU_032_1752113503.png
+25-08-01 15:57:36.443 : A023_C009_0101VU_032_1752113503.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:36.450 : 處理影像 33/60: A023_C009_0101VU_033_1752113504.png
+25-08-01 15:57:37.132 : A023_C009_0101VU_033_1752113504.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:37.139 : 處理影像 34/60: A023_C009_0101VU_034_1752113504.png
+25-08-01 15:57:37.810 : A023_C009_0101VU_034_1752113504.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:37.818 : 處理影像 35/60: A023_C009_0101VU_035_1752113505.png
+25-08-01 15:57:38.512 : A023_C009_0101VU_035_1752113505.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:38.519 : 處理影像 36/60: A023_C009_0101VU_036_1752113506.png
+25-08-01 15:57:39.197 : A023_C009_0101VU_036_1752113506.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:39.204 : 處理影像 37/60: A023_C009_0101VU_037_1752113506.png
+25-08-01 15:57:39.884 : A023_C009_0101VU_037_1752113506.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:39.892 : 處理影像 38/60: A023_C009_0101VU_038_1752113507.png
+25-08-01 15:57:40.584 : A023_C009_0101VU_038_1752113507.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:40.591 : 處理影像 39/60: A023_C009_0101VU_039_1752113508.png
+25-08-01 15:57:41.274 : A023_C009_0101VU_039_1752113508.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:41.280 : 處理影像 40/60: A023_C009_0101VU_040_1752113508.png
+25-08-01 15:57:41.974 : A023_C009_0101VU_040_1752113508.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:41.980 : 處理影像 41/60: A023_C009_0101VU_041_1752113509.png
+25-08-01 15:57:42.665 : A023_C009_0101VU_041_1752113509.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:42.672 : 處理影像 42/60: A023_C009_0101VU_042_1752113510.png
+25-08-01 15:57:43.358 : A023_C009_0101VU_042_1752113510.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:43.365 : 處理影像 43/60: A023_C009_0101VU_043_1752113510.png
+25-08-01 15:57:44.061 : A023_C009_0101VU_043_1752113510.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:44.067 : 處理影像 44/60: A023_C009_0101VU_044_1752113511.png
+25-08-01 15:57:44.741 : A023_C009_0101VU_044_1752113511.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:44.748 : 處理影像 45/60: A023_C009_0101VU_045_1752113512.png
+25-08-01 15:57:45.448 : A023_C009_0101VU_045_1752113512.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:45.455 : 處理影像 46/60: A023_C009_0101VU_046_1752113512.png
+25-08-01 15:57:46.139 : A023_C009_0101VU_046_1752113512.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:46.146 : 處理影像 47/60: A023_C009_0101VU_047_1752113513.png
+25-08-01 15:57:46.821 : A023_C009_0101VU_047_1752113513.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:46.827 : 處理影像 48/60: A023_C009_0101VU_048_1752113514.png
+25-08-01 15:57:47.523 : A023_C009_0101VU_048_1752113514.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:47.530 : 處理影像 49/60: A023_C009_0101VU_049_1752113514.png
+25-08-01 15:57:48.211 : A023_C009_0101VU_049_1752113514.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:48.216 : 處理影像 50/60: A023_C009_0101VU_050_1752113515.png
+25-08-01 15:57:48.902 : A023_C009_0101VU_050_1752113515.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:48.910 : 處理影像 51/60: A023_C009_0101VU_051_1752113516.png
+25-08-01 15:57:49.897 : A023_C009_0101VU_051_1752113516.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:49.904 : 處理影像 52/60: A023_C009_0101VU_052_1752113516.png
+25-08-01 15:57:50.595 : A023_C009_0101VU_052_1752113516.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:50.601 : 處理影像 53/60: A023_C009_0101VU_053_1752113517.png
+25-08-01 15:57:51.280 : A023_C009_0101VU_053_1752113517.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:51.287 : 處理影像 54/60: A023_C009_0101VU_054_1752113518.png
+25-08-01 15:57:51.974 : A023_C009_0101VU_054_1752113518.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:51.980 : 處理影像 55/60: A023_C009_0101VU_055_1752113518.png
+25-08-01 15:57:52.662 : A023_C009_0101VU_055_1752113518.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:52.668 : 處理影像 56/60: A023_C009_0101VU_056_1752113519.png
+25-08-01 15:57:53.370 : A023_C009_0101VU_056_1752113519.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:53.377 : 處理影像 57/60: A023_C009_0101VU_057_1752113520.png
+25-08-01 15:57:54.054 : A023_C009_0101VU_057_1752113520.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:54.061 : 處理影像 58/60: A023_C009_0101VU_058_1752113520.png
+25-08-01 15:57:54.777 : A023_C009_0101VU_058_1752113520.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:54.786 : 處理影像 59/60: A023_C009_0101VU_059_1752113521.png
+25-08-01 15:57:55.483 : A023_C009_0101VU_059_1752113521.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:55.490 : 處理影像 60/60: A023_C009_0101VU_060_1752113522.png
+25-08-01 15:57:56.174 : A023_C009_0101VU_060_1752113522.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 15:57:56.186 : 
+============================================================
+25-08-01 15:57:56.186 :  處理結果統計 (GPU優化版)
+25-08-01 15:57:56.187 : ============================================================
+25-08-01 15:57:56.187 : 總影像數量: 60
+25-08-01 15:57:56.187 : 成功處理: 0
+25-08-01 15:57:56.187 : 處理失敗: 60
+25-08-01 15:57:56.188 : 成功率: 0.0%
+25-08-01 15:57:56.188 : 總處理時間: 43.68 秒
+25-08-01 15:57:56.188 : 平均每張時間: 0.00 秒
+25-08-01 15:57:56.188 : 處理速度: 0.00 張/秒
+25-08-01 15:57:56.189 : 批次處理模式: 停用
+25-08-01 15:57:56.189 : 混合精度AMP: 啟用
+25-08-01 15:57:56.190 : 結果儲存位置: taipei101_color_denoised
+25-08-01 16:09:01.558 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 16:09:01.558 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 16:09:01.558 : 輸入目錄: testsets/taipei101
+25-08-01 16:09:01.558 : 輸出目錄: taipei101_color_denoised
+25-08-01 16:09:01.559 : 基礎雜訊等級: 5.0
+25-08-01 16:09:01.559 : 批次處理: True
+25-08-01 16:09:01.559 : 性能監控: True
+25-08-01 16:09:01.559 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 16:09:01.725 : 使用設備: cuda
+25-08-01 16:09:01.726 : 初始GPU記憶體: 已分配 0.00GB, 快取 0.00GB
+25-08-01 16:09:01.726 : 載入 DRUNet 去噪模型...
+25-08-01 16:09:02.058 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 16:09:02.291 : DRUNet模型參數數量: 32,640,960
+25-08-01 16:09:02.301 : 找到影像檔案數量: 60
+25-08-01 16:09:02.301 : 正規化雜訊等級: 0.0196
+25-08-01 16:09:02.302 : 開始處理影像 (GPU優化模式)...
+25-08-01 16:09:02.302 : 使用批次處理模式提升效率
+25-08-01 16:39:47.823 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 16:39:47.823 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 16:39:47.823 : 輸入目錄: testsets/taipei101
+25-08-01 16:39:47.824 : 輸出目錄: taipei101_color_denoised
+25-08-01 16:39:47.824 : 基礎雜訊等級: 5.0
+25-08-01 16:39:47.824 : 批次處理: True
+25-08-01 16:39:47.824 : 性能監控: True
+25-08-01 16:39:47.824 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 16:39:47.880 : 使用設備: cuda
+25-08-01 16:39:47.881 : 初始GPU記憶體: 已分配 0.00GB, 快取 0.00GB
+25-08-01 16:39:47.881 : 載入 DRUNet 去噪模型...
+25-08-01 16:39:48.215 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 16:39:48.428 : DRUNet模型參數數量: 32,640,960
+25-08-01 16:39:48.437 : 找到影像檔案數量: 60
+25-08-01 16:39:48.438 : 正規化雜訊等級: 0.0196
+25-08-01 16:39:48.438 : 開始處理影像 (GPU優化模式)...
+25-08-01 16:39:48.438 : 使用批次處理模式提升效率
+25-08-01 16:47:18.062 : 批次處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:04.715 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 17:02:04.716 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 17:02:04.716 : 輸入目錄: testsets/taipei101
+25-08-01 17:02:04.716 : 輸出目錄: taipei101_color_denoised
+25-08-01 17:02:04.716 : 基礎雜訊等級: 5.0
+25-08-01 17:02:04.716 : 性能監控: False
+25-08-01 17:02:04.717 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 17:02:04.717 : 處理模式: 單張處理 (已移除批次處理以提升穩定性)
+25-08-01 17:02:04.776 : 使用設備: cuda
+25-08-01 17:02:04.777 : 載入 DRUNet 去噪模型...
+25-08-01 17:02:05.146 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 17:02:05.315 : DRUNet模型參數數量: 32,640,960
+25-08-01 17:02:05.322 : 找到影像檔案數量: 60
+25-08-01 17:02:05.332 : 正規化雜訊等級: 0.0196
+25-08-01 17:02:05.332 : 開始處理影像 (GPU優化模式)...
+25-08-01 17:02:05.333 : 使用雙流單張處理模式
+25-08-01 17:02:05.333 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 17:02:07.918 : A023_C009_0101VU_001_1752113482.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:07.926 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 17:02:08.614 : A023_C009_0101VU_002_1752113483.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:08.621 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 17:02:09.303 : A023_C009_0101VU_003_1752113484.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:09.310 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 17:02:10.003 : A023_C009_0101VU_004_1752113484.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:10.010 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 17:02:10.696 : A023_C009_0101VU_005_1752113485.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:10.705 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 17:02:11.685 : A023_C009_0101VU_006_1752113486.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:11.843 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 17:02:12.805 : A023_C009_0101VU_007_1752113486.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:12.813 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-01 17:02:13.497 : A023_C009_0101VU_008_1752113487.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:13.504 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-01 17:02:14.192 : A023_C009_0101VU_009_1752113488.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:14.199 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-01 17:02:14.895 : A023_C009_0101VU_010_1752113488.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:14.903 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-01 17:02:15.797 : A023_C009_0101VU_011_1752113489.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:15.805 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-01 17:02:16.624 : A023_C009_0101VU_012_1752113490.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:16.687 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-01 17:02:18.187 : A023_C009_0101VU_013_1752113490.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:18.375 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-01 17:02:19.623 : A023_C009_0101VU_014_1752113491.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:19.630 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-01 17:02:20.380 : A023_C009_0101VU_015_1752113492.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:20.388 : 處理影像 16/60: A023_C009_0101VU_016_1752113492.png
+25-08-01 17:02:21.159 : A023_C009_0101VU_016_1752113492.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:21.166 : 處理影像 17/60: A023_C009_0101VU_017_1752113493.png
+25-08-01 17:02:21.931 : A023_C009_0101VU_017_1752113493.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:21.939 : 處理影像 18/60: A023_C009_0101VU_018_1752113494.png
+25-08-01 17:02:22.655 : A023_C009_0101VU_018_1752113494.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:22.662 : 處理影像 19/60: A023_C009_0101VU_019_1752113494.png
+25-08-01 17:02:23.359 : A023_C009_0101VU_019_1752113494.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:23.366 : 處理影像 20/60: A023_C009_0101VU_020_1752113495.png
+25-08-01 17:02:24.109 : A023_C009_0101VU_020_1752113495.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:24.124 : 處理影像 21/60: A023_C009_0101VU_021_1752113496.png
+25-08-01 17:02:25.050 : A023_C009_0101VU_021_1752113496.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:25.058 : 處理影像 22/60: A023_C009_0101VU_022_1752113496.png
+25-08-01 17:02:25.994 : A023_C009_0101VU_022_1752113496.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:26.002 : 處理影像 23/60: A023_C009_0101VU_023_1752113497.png
+25-08-01 17:02:26.862 : A023_C009_0101VU_023_1752113497.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:26.875 : 處理影像 24/60: A023_C009_0101VU_024_1752113498.png
+25-08-01 17:02:27.586 : A023_C009_0101VU_024_1752113498.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:27.593 : 處理影像 25/60: A023_C009_0101VU_025_1752113498.png
+25-08-01 17:02:28.297 : A023_C009_0101VU_025_1752113498.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:28.304 : 處理影像 26/60: A023_C009_0101VU_026_1752113499.png
+25-08-01 17:02:28.989 : A023_C009_0101VU_026_1752113499.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:28.997 : 處理影像 27/60: A023_C009_0101VU_027_1752113500.png
+25-08-01 17:02:29.677 : A023_C009_0101VU_027_1752113500.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:29.684 : 處理影像 28/60: A023_C009_0101VU_028_1752113500.png
+25-08-01 17:02:30.397 : A023_C009_0101VU_028_1752113500.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:30.407 : 處理影像 29/60: A023_C009_0101VU_029_1752113501.png
+25-08-01 17:02:31.084 : A023_C009_0101VU_029_1752113501.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:31.090 : 處理影像 30/60: A023_C009_0101VU_030_1752113502.png
+25-08-01 17:02:31.780 : A023_C009_0101VU_030_1752113502.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:31.790 : 處理影像 31/60: A023_C009_0101VU_031_1752113502.png
+25-08-01 17:02:32.557 : A023_C009_0101VU_031_1752113502.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:32.564 : 處理影像 32/60: A023_C009_0101VU_032_1752113503.png
+25-08-01 17:02:33.285 : A023_C009_0101VU_032_1752113503.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:33.292 : 處理影像 33/60: A023_C009_0101VU_033_1752113504.png
+25-08-01 17:02:33.999 : A023_C009_0101VU_033_1752113504.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:34.007 : 處理影像 34/60: A023_C009_0101VU_034_1752113504.png
+25-08-01 17:02:34.764 : A023_C009_0101VU_034_1752113504.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:34.775 : 處理影像 35/60: A023_C009_0101VU_035_1752113505.png
+25-08-01 17:02:35.635 : A023_C009_0101VU_035_1752113505.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:35.642 : 處理影像 36/60: A023_C009_0101VU_036_1752113506.png
+25-08-01 17:02:36.334 : A023_C009_0101VU_036_1752113506.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:36.341 : 處理影像 37/60: A023_C009_0101VU_037_1752113506.png
+25-08-01 17:02:37.574 : A023_C009_0101VU_037_1752113506.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:37.643 : 處理影像 38/60: A023_C009_0101VU_038_1752113507.png
+25-08-01 17:02:39.157 : A023_C009_0101VU_038_1752113507.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:39.300 : 處理影像 39/60: A023_C009_0101VU_039_1752113508.png
+25-08-01 17:02:40.733 : A023_C009_0101VU_039_1752113508.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:40.796 : 處理影像 40/60: A023_C009_0101VU_040_1752113508.png
+25-08-01 17:02:42.660 : A023_C009_0101VU_040_1752113508.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:42.747 : 處理影像 41/60: A023_C009_0101VU_041_1752113509.png
+25-08-01 17:02:44.571 : A023_C009_0101VU_041_1752113509.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:44.799 : 處理影像 42/60: A023_C009_0101VU_042_1752113510.png
+25-08-01 17:02:47.349 : A023_C009_0101VU_042_1752113510.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:47.751 : 處理影像 43/60: A023_C009_0101VU_043_1752113510.png
+25-08-01 17:02:49.455 : A023_C009_0101VU_043_1752113510.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:49.555 : 處理影像 44/60: A023_C009_0101VU_044_1752113511.png
+25-08-01 17:02:52.173 : A023_C009_0101VU_044_1752113511.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:52.246 : 處理影像 45/60: A023_C009_0101VU_045_1752113512.png
+25-08-01 17:02:54.092 : A023_C009_0101VU_045_1752113512.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:54.218 : 處理影像 46/60: A023_C009_0101VU_046_1752113512.png
+25-08-01 17:02:56.226 : A023_C009_0101VU_046_1752113512.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:56.728 : 處理影像 47/60: A023_C009_0101VU_047_1752113513.png
+25-08-01 17:02:58.721 : A023_C009_0101VU_047_1752113513.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:02:58.785 : 處理影像 48/60: A023_C009_0101VU_048_1752113514.png
+25-08-01 17:03:00.280 : A023_C009_0101VU_048_1752113514.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:00.395 : 處理影像 49/60: A023_C009_0101VU_049_1752113514.png
+25-08-01 17:03:02.315 : A023_C009_0101VU_049_1752113514.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:02.327 : 處理影像 50/60: A023_C009_0101VU_050_1752113515.png
+25-08-01 17:03:03.105 : A023_C009_0101VU_050_1752113515.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:03.112 : 處理影像 51/60: A023_C009_0101VU_051_1752113516.png
+25-08-01 17:03:03.828 : A023_C009_0101VU_051_1752113516.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:03.835 : 處理影像 52/60: A023_C009_0101VU_052_1752113516.png
+25-08-01 17:03:04.515 : A023_C009_0101VU_052_1752113516.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:04.522 : 處理影像 53/60: A023_C009_0101VU_053_1752113517.png
+25-08-01 17:03:05.213 : A023_C009_0101VU_053_1752113517.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:05.220 : 處理影像 54/60: A023_C009_0101VU_054_1752113518.png
+25-08-01 17:03:05.913 : A023_C009_0101VU_054_1752113518.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:05.921 : 處理影像 55/60: A023_C009_0101VU_055_1752113518.png
+25-08-01 17:03:06.601 : A023_C009_0101VU_055_1752113518.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:06.608 : 處理影像 56/60: A023_C009_0101VU_056_1752113519.png
+25-08-01 17:03:07.304 : A023_C009_0101VU_056_1752113519.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:07.311 : 處理影像 57/60: A023_C009_0101VU_057_1752113520.png
+25-08-01 17:03:08.826 : A023_C009_0101VU_057_1752113520.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:08.844 : 處理影像 58/60: A023_C009_0101VU_058_1752113520.png
+25-08-01 17:03:09.673 : A023_C009_0101VU_058_1752113520.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:09.682 : 處理影像 59/60: A023_C009_0101VU_059_1752113521.png
+25-08-01 17:03:10.460 : A023_C009_0101VU_059_1752113521.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:10.467 : 處理影像 60/60: A023_C009_0101VU_060_1752113522.png
+25-08-01 17:03:11.235 : A023_C009_0101VU_060_1752113522.png - 處理失敗: not enough values to unpack (expected 3, got 1)
+25-08-01 17:03:11.248 : 
+============================================================
+25-08-01 17:03:11.249 :  處理結果統計 (GPU優化版)
+25-08-01 17:03:11.249 : ============================================================
+25-08-01 17:03:11.249 : 總影像數量: 60
+25-08-01 17:03:11.250 : 成功處理: 0
+25-08-01 17:03:11.250 : 處理失敗: 60
+25-08-01 17:03:11.250 : 成功率: 0.0%
+25-08-01 17:03:11.250 : 總處理時間: 65.92 秒
+25-08-01 17:03:11.251 : 平均每張時間: 0.00 秒
+25-08-01 17:03:11.251 : 處理速度: 0.00 張/秒
+25-08-01 17:03:11.251 : 處理模式: 單張處理 (已移除批次處理)
+25-08-01 17:03:11.251 : 混合精度AMP: 啟用
+25-08-01 17:03:11.251 : 結果儲存位置: taipei101_color_denoised
+25-08-01 17:51:39.512 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 17:51:39.513 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 17:51:39.513 : 輸入目錄: testsets/taipei101
+25-08-01 17:51:39.513 : 輸出目錄: taipei101_color_denoised
+25-08-01 17:51:39.513 : 基礎雜訊等級: 5.0
+25-08-01 17:51:39.513 : 性能監控: False
+25-08-01 17:51:39.514 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 17:51:39.514 : 處理模式: 單張處理 (已移除批次處理以提升穩定性)
+25-08-01 17:51:39.569 : 使用設備: cuda
+25-08-01 17:51:39.570 : 載入 DRUNet 去噪模型...
+25-08-01 17:51:39.957 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 17:51:40.257 : DRUNet模型參數數量: 32,640,960
+25-08-01 17:51:40.268 : 找到影像檔案數量: 60
+25-08-01 17:51:40.269 : 正規化雜訊等級: 0.0196
+25-08-01 17:51:40.269 : 開始處理影像 (GPU優化模式)...
+25-08-01 17:51:40.272 : 使用雙流單張處理模式
+25-08-01 17:51:40.272 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 17:51:57.968 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 17:52:11.959 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-01 17:52:26.414 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-01 17:52:52.365 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-01 17:53:12.135 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-01 17:53:30.403 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-01 17:53:43.582 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-01 17:53:57.814 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-01 17:54:13.039 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-01 17:54:26.551 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-01 17:54:44.515 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-01 17:54:58.632 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-01 17:55:13.476 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-01 17:55:32.859 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-01 17:56:28.154 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-01 17:56:28.155 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-01 17:56:28.155 : 輸入目錄: testsets/taipei101
+25-08-01 17:56:28.155 : 輸出目錄: taipei101_color_denoised
+25-08-01 17:56:28.155 : 基礎雜訊等級: 5.0
+25-08-01 17:56:28.155 : 性能監控: False
+25-08-01 17:56:28.155 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-01 17:56:28.156 : 處理模式: 單張處理 (已移除批次處理以提升穩定性)
+25-08-01 17:56:28.207 : 使用設備: cuda
+25-08-01 17:56:28.208 : 載入 DRUNet 去噪模型...
+25-08-01 17:56:28.554 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-01 17:56:28.759 : DRUNet模型參數數量: 32,640,960
+25-08-01 17:56:28.769 : 找到影像檔案數量: 60
+25-08-01 17:56:28.769 : 正規化雜訊等級: 0.0196
+25-08-01 17:56:28.770 : 開始處理影像 (GPU優化模式)...
+25-08-01 17:56:28.770 : 使用雙流單張處理模式
+25-08-01 17:56:28.770 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-01 17:56:40.817 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-01 17:56:48.778 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-04 09:47:30.533 : === 台北101影像去噪處理 (雙流分離方法) ===
+25-08-04 09:47:30.535 : DRUNet模型路徑: model_zoo/drunet_color.pth
+25-08-04 09:47:30.535 : 輸入目錄: testsets/taipei101
+25-08-04 09:47:30.535 : 輸出目錄: taipei101_color_denoised
+25-08-04 09:47:30.535 : 基礎雜訊等級: 2.5
+25-08-04 09:47:30.536 : 性能監控: False
+25-08-04 09:47:30.536 : 處理方法: 雙流分離 (σ_low保細節 + σ_high強去噪 + 邊緣遮罩融合)
+25-08-04 09:47:30.536 : 處理模式: 單張處理 (已移除批次處理以提升穩定性)
+25-08-04 09:47:30.893 : 使用設備: cuda
+25-08-04 09:47:30.894 : 載入 DRUNet 去噪模型...
+25-08-04 09:47:31.701 : [SUCCESS] 模型載入成功 (直接載入)
+25-08-04 09:47:31.949 : DRUNet模型參數數量: 32,640,960
+25-08-04 09:47:31.959 : 找到影像檔案數量: 60
+25-08-04 09:47:31.960 : 正規化雜訊等級: 0.0098
+25-08-04 09:47:31.960 : 開始處理影像 (GPU優化模式)...
+25-08-04 09:47:31.960 : 使用雙流單張處理模式
+25-08-04 09:47:31.961 : 處理影像 1/60: A023_C009_0101VU_001_1752113482.png
+25-08-04 09:47:44.531 : 處理影像 2/60: A023_C009_0101VU_002_1752113483.png
+25-08-04 09:47:51.354 : 處理影像 3/60: A023_C009_0101VU_003_1752113484.png
+25-08-04 09:47:58.844 : 處理影像 4/60: A023_C009_0101VU_004_1752113484.png
+25-08-04 09:48:06.628 : 處理影像 5/60: A023_C009_0101VU_005_1752113485.png
+25-08-04 09:48:13.413 : 處理影像 6/60: A023_C009_0101VU_006_1752113486.png
+25-08-04 09:48:22.166 : 處理影像 7/60: A023_C009_0101VU_007_1752113486.png
+25-08-04 09:48:30.288 : 處理影像 8/60: A023_C009_0101VU_008_1752113487.png
+25-08-04 09:48:37.135 : 處理影像 9/60: A023_C009_0101VU_009_1752113488.png
+25-08-04 09:48:44.009 : 處理影像 10/60: A023_C009_0101VU_010_1752113488.png
+25-08-04 09:48:50.605 : 處理影像 11/60: A023_C009_0101VU_011_1752113489.png
+25-08-04 09:48:57.292 : 處理影像 12/60: A023_C009_0101VU_012_1752113490.png
+25-08-04 09:49:03.940 : 處理影像 13/60: A023_C009_0101VU_013_1752113490.png
+25-08-04 09:49:10.716 : 處理影像 14/60: A023_C009_0101VU_014_1752113491.png
+25-08-04 09:49:17.831 : 處理影像 15/60: A023_C009_0101VU_015_1752113492.png
+25-08-04 09:49:24.718 : 處理影像 16/60: A023_C009_0101VU_016_1752113492.png
+25-08-04 09:49:31.471 : 處理影像 17/60: A023_C009_0101VU_017_1752113493.png
+25-08-04 09:49:38.222 : 處理影像 18/60: A023_C009_0101VU_018_1752113494.png
+25-08-04 09:49:45.008 : 處理影像 19/60: A023_C009_0101VU_019_1752113494.png
+25-08-04 09:49:52.004 : 處理影像 20/60: A023_C009_0101VU_020_1752113495.png
+25-08-04 09:49:59.066 : 處理影像 21/60: A023_C009_0101VU_021_1752113496.png
+25-08-04 09:50:06.348 : 處理影像 22/60: A023_C009_0101VU_022_1752113496.png
+25-08-04 09:50:13.778 : 處理影像 23/60: A023_C009_0101VU_023_1752113497.png
+25-08-04 09:50:20.774 : 處理影像 24/60: A023_C009_0101VU_024_1752113498.png
+25-08-04 09:50:27.733 : 處理影像 25/60: A023_C009_0101VU_025_1752113498.png
+25-08-04 09:50:34.344 : 處理影像 26/60: A023_C009_0101VU_026_1752113499.png
+25-08-04 09:50:41.140 : 處理影像 27/60: A023_C009_0101VU_027_1752113500.png
+25-08-04 09:50:48.302 : 處理影像 28/60: A023_C009_0101VU_028_1752113500.png
+25-08-04 09:50:55.073 : 處理影像 29/60: A023_C009_0101VU_029_1752113501.png
+25-08-04 09:51:01.909 : 處理影像 30/60: A023_C009_0101VU_030_1752113502.png
+25-08-04 09:51:08.956 : 處理影像 31/60: A023_C009_0101VU_031_1752113502.png
+25-08-04 09:51:15.826 : 處理影像 32/60: A023_C009_0101VU_032_1752113503.png
+25-08-04 09:51:22.638 : 處理影像 33/60: A023_C009_0101VU_033_1752113504.png
+25-08-04 09:51:30.082 : 處理影像 34/60: A023_C009_0101VU_034_1752113504.png
+25-08-04 09:51:37.085 : 處理影像 35/60: A023_C009_0101VU_035_1752113505.png
+25-08-04 09:51:43.824 : 處理影像 36/60: A023_C009_0101VU_036_1752113506.png
+25-08-04 09:51:50.618 : 處理影像 37/60: A023_C009_0101VU_037_1752113506.png
+25-08-04 09:51:57.494 : 處理影像 38/60: A023_C009_0101VU_038_1752113507.png
+25-08-04 09:52:04.163 : 處理影像 39/60: A023_C009_0101VU_039_1752113508.png
+25-08-04 09:52:10.939 : 處理影像 40/60: A023_C009_0101VU_040_1752113508.png
+25-08-04 09:52:18.090 : 處理影像 41/60: A023_C009_0101VU_041_1752113509.png
+25-08-04 09:52:25.367 : 處理影像 42/60: A023_C009_0101VU_042_1752113510.png
+25-08-04 09:52:32.339 : 處理影像 43/60: A023_C009_0101VU_043_1752113510.png
+25-08-04 09:52:39.123 : 處理影像 44/60: A023_C009_0101VU_044_1752113511.png
+25-08-04 09:52:45.982 : 處理影像 45/60: A023_C009_0101VU_045_1752113512.png
+25-08-04 09:52:52.880 : 處理影像 46/60: A023_C009_0101VU_046_1752113512.png
+25-08-04 09:52:59.546 : 處理影像 47/60: A023_C009_0101VU_047_1752113513.png
+25-08-04 09:53:06.176 : 處理影像 48/60: A023_C009_0101VU_048_1752113514.png
+25-08-04 09:53:13.021 : 處理影像 49/60: A023_C009_0101VU_049_1752113514.png
+25-08-04 09:53:19.725 : 處理影像 50/60: A023_C009_0101VU_050_1752113515.png
+25-08-04 09:53:26.638 : 處理影像 51/60: A023_C009_0101VU_051_1752113516.png
+25-08-04 09:53:33.602 : 處理影像 52/60: A023_C009_0101VU_052_1752113516.png
+25-08-04 09:53:40.687 : 處理影像 53/60: A023_C009_0101VU_053_1752113517.png
+25-08-04 09:53:47.708 : 處理影像 54/60: A023_C009_0101VU_054_1752113518.png
+25-08-04 09:53:54.750 : 處理影像 55/60: A023_C009_0101VU_055_1752113518.png
+25-08-04 09:54:01.777 : 處理影像 56/60: A023_C009_0101VU_056_1752113519.png
+25-08-04 09:54:09.341 : 處理影像 57/60: A023_C009_0101VU_057_1752113520.png
+25-08-04 09:54:16.653 : 處理影像 58/60: A023_C009_0101VU_058_1752113520.png
+25-08-04 09:54:24.018 : 處理影像 59/60: A023_C009_0101VU_059_1752113521.png
+25-08-04 09:54:31.727 : 處理影像 60/60: A023_C009_0101VU_060_1752113522.png
+25-08-04 09:54:40.256 : 
+============================================================
+25-08-04 09:54:40.256 :  處理結果統計 (GPU優化版)
+25-08-04 09:54:40.256 : ============================================================
+25-08-04 09:54:40.256 : 總影像數量: 60
+25-08-04 09:54:40.256 : 成功處理: 60
+25-08-04 09:54:40.256 : 處理失敗: 0
+25-08-04 09:54:40.256 : 成功率: 100.0%
+25-08-04 09:54:40.256 : 總處理時間: 428.30 秒
+25-08-04 09:54:40.256 : 平均每張時間: 7.14 秒
+25-08-04 09:54:40.256 : 處理速度: 0.14 張/秒
+25-08-04 09:54:40.256 : 處理模式: 單張處理 (已移除批次處理)
+25-08-04 09:54:40.256 : 混合精度AMP: 啟用
+25-08-04 09:54:40.256 : 結果儲存位置: taipei101_color_denoised
