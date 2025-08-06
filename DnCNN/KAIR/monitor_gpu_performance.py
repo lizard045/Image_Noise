@@ -145,7 +145,7 @@ class GPUMonitor:
             return
         
         # 設定中文字體
-        font_path = r'C:\Users\brogent\Desktop\Image_Noise\Mamelon.otf'
+        font_path = r'D:\Image_Noise\Mamelon.otf'
         if os.path.exists(font_path):
             chinese_font = fm.FontProperties(fname=font_path)
             plt.rcParams['font.family'] = 'sans-serif'
