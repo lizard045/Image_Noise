@@ -36,9 +36,9 @@ def main():
     # 參數設定
     # ----------------------------------------
     parser = argparse.ArgumentParser(description='台北101影像去噪品質評估')
-    parser.add_argument('--original_dir', type=str, default='testsets/taipei101', 
+    parser.add_argument('--original_dir', type=str, default='testsets/TAIPEI_NO_TUNE_8K', 
                        help='原始影像目錄路徑')
-    parser.add_argument('--denoised_dir', type=str, default='taipei101_color_denoised', 
+    parser.add_argument('--denoised_dir', type=str, default='taipei101_stable_denoised', 
                        help='去噪後影像目錄路徑')
     parser.add_argument('--results_dir', type=str, default='evaluation_results', 
                        help='評估結果儲存目錄')
