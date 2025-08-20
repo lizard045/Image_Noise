@@ -15,7 +15,6 @@ import numpy as np
 from collections import OrderedDict
 import cv2
 import time
-from torch.cuda.amp import autocast, GradScaler
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.nn.functional as F
@@ -36,6 +35,24 @@ try:
 except ImportError as e:
     print(f"    增強功能模組載入失敗: {str(e)}")
     ENHANCED_FEATURES_AVAILABLE = False
+
+try:
+    from torch.amp import autocast as _autocast_base
+    def autocast_if_amp(enabled):
+        return _autocast_base('cuda', enabled=enabled)
+except ImportError:
+    from torch.cuda.amp import autocast as _autocast_base
+    def autocast_if_amp(enabled):
+        return _autocast_base(enabled=enabled)
+
+
+def _prepare_image(img):
+    """確保影像為(H,W,C)格式"""
+    if len(img.shape) == 2:
+        return img[:, :, np.newaxis]
+    if len(img.shape) == 4:
+        return img[0]
+    return img
 
 class RobustSelfAttention(nn.Module):
     """穩定版Self-Attention模組 - 修復所有維度問題"""
@@ -265,20 +282,11 @@ def stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_op
     穩定雙流處理 - 專注於可靠性
     """
     try:
-        # 確保輸入格式正確
-        if len(img_L.shape) == 2:
-            img_L = img_L[:, :, np.newaxis] 
-        elif len(img_L.shape) == 4:
-            img_L = img_L[0]
-        
         # 轉換為tensor
         img_tensor = util.uint2tensor4(img_L).to(device)
-        
+
         # 自適應噪聲參數
-        if len(img_L.shape) == 3:
-            gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
-        else:
-            gray = img_L.squeeze()
+        gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
         
         # 根據影像特性調整參數
         laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
@@ -302,14 +310,8 @@ def stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_op
         img_input_low = torch.cat([img_tensor, noise_tensor_low], dim=1)
         
         with torch.no_grad():
-            try:
-                from torch.amp import autocast
-                with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                    o_low = model(img_input_low)
-            except ImportError:
-                from torch.cuda.amp import autocast
-                with autocast(enabled=gpu_optimizer.use_amp):
-                    o_low = model(img_input_low)
+            with autocast_if_amp(gpu_optimizer.use_amp):
+                o_low = model(img_input_low)
         
         # Pass-2: 高噪聲等級處理  
         noise_level_high = sigma_high / 255.0
@@ -318,76 +320,56 @@ def stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_op
         img_input_high = torch.cat([img_tensor, noise_tensor_high], dim=1)
         
         with torch.no_grad():
-            try:
-                from torch.amp import autocast
-                with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                    o_high = model(img_input_high)
-            except ImportError:
-                from torch.cuda.amp import autocast
-                with autocast(enabled=gpu_optimizer.use_amp):
-                    o_high = model(img_input_high)
-        
-        # 轉換為numpy
-        o_low_np = util.tensor2uint(o_low)
-        o_high_np = util.tensor2uint(o_high)
-        
-        # 確保3維格式
-        if len(o_low_np.shape) == 2:
-            o_low_np = o_low_np[:, :, np.newaxis]
-        if len(o_high_np.shape) == 2:
-            o_high_np = o_high_np[:, :, np.newaxis]
+            with autocast_if_amp(gpu_optimizer.use_amp):
+                o_high = model(img_input_high)
         
         # 雙流融合 - 根據啟用的功能選擇處理方式
         try:
             if enable_region_adaptive:
                 print(f"    使用區域自適應處理...")
-                # 直接調用模型進行區域自適應處理
-                fused_result = _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention)
+                fused_np = _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention)
+                fused_tensor = util.uint2tensor4(fused_np).to(device)
                 print(f"    區域自適應處理完成")
             elif gpu_optimizer.enhanced_mode and gpu_optimizer.feature_extractor:
                 print(f"    使用增強版特徵融合...")
                 try:
-                    fused_result, edge_weight = enhanced_feature_based_fusion(
+                    o_low_np = util.tensor2uint(o_low)
+                    o_high_np = util.tensor2uint(o_high)
+                    fused_np, edge_weight = enhanced_feature_based_fusion(
                         o_low_np, o_high_np, img_L, base_noise_level
                     )
+                    fused_tensor = util.uint2tensor4(fused_np).to(device)
                     print(f"    增強版融合完成")
                 except Exception as enhanced_e:
                     print(f"    增強版融合失敗: {str(enhanced_e)[:50]}..., 使用傳統方法")
-                    fused_result, edge_weight = _traditional_edge_fusion(o_low_np, o_high_np, gray)
+                    fused_tensor, edge_weight = _traditional_edge_fusion_tensor(o_low, o_high, img_tensor)
             else:
-                # 傳統多尺度邊緣檢測融合
-                fused_result, edge_weight = _traditional_edge_fusion(o_low_np, o_high_np, gray)
+                fused_tensor, edge_weight = _traditional_edge_fusion_tensor(o_low, o_high, img_tensor)
         except Exception as processing_e:
             print(f"    處理失敗: {str(processing_e)[:50]}..., 使用傳統方法")
-            # 傳統多尺度邊緣檢測融合
-            fused_result, edge_weight = _traditional_edge_fusion(o_low_np, o_high_np, gray)
-        
+            fused_tensor, edge_weight = _traditional_edge_fusion_tensor(o_low, o_high, img_tensor)
+
         # Self-Attention增強 (如果啟用且可用)
         if enable_attention and gpu_optimizer.attention_module is not None:
             try:
                 print(f"    應用Self-Attention增強...")
-                attn_tensor = util.uint2tensor4(fused_result).to(device)
                 with torch.no_grad():
-                    try:
-                        from torch.amp import autocast
-                        with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                            attn_enhanced = gpu_optimizer.attention_module(attn_tensor)
-                    except ImportError:
-                        from torch.cuda.amp import autocast
-                        with autocast(enabled=gpu_optimizer.use_amp):
-                            attn_enhanced = gpu_optimizer.attention_module(attn_tensor)
-                
-                final_result = util.tensor2uint(attn_enhanced)
+                    with autocast_if_amp(gpu_optimizer.use_amp):
+                        attn_enhanced = gpu_optimizer.attention_module(fused_tensor)
+
+                final_tensor = attn_enhanced
                 print(f"    Self-Attention處理成功")
-                
+
                 # 清理attention相關tensor
-                del attn_tensor, attn_enhanced
-                
+                del attn_enhanced
+
             except Exception as e:
                 print(f"     Self-Attention處理失敗: {str(e)[:50]}..., 使用原結果")
-                final_result = fused_result
+                final_tensor = fused_tensor
         else:
-            final_result = fused_result
+            final_tensor = fused_tensor
+
+        final_result = util.tensor2uint(final_tensor)
         
         # 清理記憶體
         del img_tensor, img_input_low, img_input_high, o_low, o_high
@@ -403,11 +385,6 @@ def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, e
     """
     穩定分塊處理
     """
-    if len(img_L.shape) == 2:
-        img_L = img_L[:, :, np.newaxis]
-    elif len(img_L.shape) == 4:
-        img_L = img_L[0]
-    
     h, w, c = img_L.shape
     tile_h, tile_w = gpu_optimizer.get_optimal_tile_size((h, w))
     
@@ -450,9 +427,8 @@ def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, e
                 result_img[actual_start_h:end_h, actual_start_w:end_w, :] = \
                     tile_result[tile_start_h:, tile_start_w:, :]
             
-            # 每塊後清理記憶體
-            gpu_optimizer.cleanup_memory()
-    
+    gpu_optimizer.cleanup_memory()
+
     return result_img
 
 def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer):
@@ -466,14 +442,8 @@ def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optim
         img_input = torch.cat([img_tensor, noise_tensor], dim=1)
         
         with torch.no_grad():
-            try:
-                from torch.amp import autocast
-                with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                    img_output = model(img_input)
-            except ImportError:
-                from torch.cuda.amp import autocast
-                with autocast(enabled=gpu_optimizer.use_amp):
-                    img_output = model(img_input)
+            with autocast_if_amp(gpu_optimizer.use_amp):
+                img_output = model(img_input)
         
         result = util.tensor2uint(img_output)
         
@@ -516,8 +486,26 @@ def _traditional_edge_fusion(o_low_np, o_high_np, gray):
     # 雙流融合
     fused_result = edge_weight * o_low_np.astype(np.float32) + (1 - edge_weight) * o_high_np.astype(np.float32)
     fused_result = np.clip(fused_result, 0, 255).astype(np.uint8)
-    
+
     return fused_result, edge_weight
+
+
+def _traditional_edge_fusion_tensor(o_low, o_high, img_tensor):
+    """使用Torch實作的傳統邊緣融合"""
+    gray = 0.299 * img_tensor[:, 0:1] + 0.587 * img_tensor[:, 1:2] + 0.114 * img_tensor[:, 2:3]
+
+    kernel3 = torch.tensor([[0, 1, 0], [1, -4, 1], [0, 1, 0]], dtype=gray.dtype, device=gray.device).view(1, 1, 3, 3)
+    edge3 = torch.abs(F.conv2d(gray, kernel3, padding=1))
+    edge5 = torch.abs(F.conv2d(gray, kernel3, padding=2, dilation=2))
+    combined_edge = 0.7 * edge3 + 0.3 * edge5
+
+    tau = torch.quantile(combined_edge, 0.30)
+    M = torch.quantile(combined_edge, 0.90)
+    edge_weight = ((combined_edge - tau) / (M - tau + 1e-6)).clamp(0, 1)
+    edge_weight = F.avg_pool2d(edge_weight, kernel_size=3, stride=1, padding=1)
+
+    fused = edge_weight * o_low + (1 - edge_weight) * o_high
+    return fused, edge_weight
 
 def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention):
     """
@@ -526,10 +514,7 @@ def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gp
     print(f"      啟用區域自適應分析...")
     
     # 獲取灰度圖像
-    if len(img_L.shape) == 3:
-        gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = img_L.squeeze()
+    gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
     
     h, w = gray.shape
     
@@ -605,16 +590,9 @@ def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gp
         img_input_high = torch.cat([img_tensor, noise_tensor_high], dim=1)
         
         with torch.no_grad():
-            try:
-                from torch.amp import autocast
-                with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                    o_low = model(img_input_low)
-                    o_high = model(img_input_high)
-            except ImportError:
-                from torch.cuda.amp import autocast
-                with autocast(enabled=gpu_optimizer.use_amp):
-                    o_low = model(img_input_low)
-                    o_high = model(img_input_high)
+            with autocast_if_amp(gpu_optimizer.use_amp):
+                o_low = model(img_input_low)
+                o_high = model(img_input_high)
         
         # 轉換為numpy
         o_low_np = util.tensor2uint(o_low)
@@ -638,10 +616,7 @@ def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gp
     
     # 4. 區域自適應融合
     print(f"        執行區域融合...")
-    if len(img_L.shape) == 3:
-        final_result = np.zeros_like(img_L, dtype=np.float32)
-    else:
-        final_result = np.zeros((h, w, 1), dtype=np.float32)
+    final_result = np.zeros_like(img_L, dtype=np.float32)
     
     weight_sum = np.zeros((h, w, 1), dtype=np.float32)
     
@@ -793,14 +768,8 @@ def _refine_residual_noise_hotspots(model, original_img, current_result, device,
     img_input = torch.cat([img_tensor, noise_tensor], dim=1)
 
     with torch.no_grad():
-        try:
-            from torch.amp import autocast
-            with autocast('cuda', enabled=gpu_optimizer.use_amp):
-                refined_out = model(img_input)
-        except ImportError:
-            from torch.cuda.amp import autocast
-            with autocast(enabled=gpu_optimizer.use_amp):
-                refined_out = model(img_input)
+        with autocast_if_amp(gpu_optimizer.use_amp):
+            refined_out = model(img_input)
 
     refined_np = util.tensor2uint(refined_out)
 
@@ -876,7 +845,7 @@ def main():
     parser.add_argument('--drunet_model_path', type=str, default='model_zoo/drunet_color.pth')
     parser.add_argument('--input_dir', type=str, default='testsets/TAIPEI_NO_TUNE_8K')
     parser.add_argument('--output_dir', type=str, default='taipei101_stable_denoised')
-    parser.add_argument('--noise_level', type=float, default=2.5)
+    parser.add_argument('--noise_level', type=float, default=2.0)
     parser.add_argument('--device', type=str, default='auto')
     parser.add_argument('--enable_attention', action='store_true', help='啟用修復版Self-Attention增強')
     parser.add_argument('--enable_enhanced_features', action='store_true', help='啟用增強版特徵提取和調優')
@@ -1017,8 +986,8 @@ def main():
             logger.info(f'處理影像 {idx+1}/{len(image_paths)}: {img_name}')
             img_start_time = time.time()
             
-            # 載入影像
-            img_L = util.imread_uint(img_path, n_channels=3)
+            # 載入影像並統一格式
+            img_L = _prepare_image(util.imread_uint(img_path, n_channels=3))
             original_shape = img_L.shape
             print(f"    影像尺寸: {original_shape}")
             
@@ -1031,6 +1000,10 @@ def main():
                 img_E = stable_dual_stream_processing(model, img_L, device, args.noise_level, gpu_optimizer, 
                                                     enable_attention=args.enable_attention,
                                                     enable_region_adaptive=args.enable_region_adaptive)
+            # 二次降噪：殘留噪點熱區精修
+            img_E = _refine_residual_noise_hotspots(
+                model, img_L, img_E, device, args.noise_level, gpu_optimizer
+            )
             
             # 確保輸出影像尺寸正確
             if img_E.shape != original_shape:
