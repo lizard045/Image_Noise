@@ -1081,13 +1081,14 @@ def calculate_niqe(img):
 # --------------------------------------------
 # LPIPS 計算
 # --------------------------------------------
-def calculate_lpips(img1, img2, net='alex'):
+def calculate_lpips(img1, img2, net='alex', lpips_metric=None):
     """
     計算 LPIPS (Learned Perceptual Image Patch Similarity) 指標
     
     Args:
         img1, img2: 輸入影像 [0, 255]，numpy arrays
         net: 使用的網路架構 ('alex', 'vgg', 'squeeze')
+        lpips_metric: 預先建立的 LPIPS 評估器，若為None則會自動建立
     
     Returns:
         lpips_score: LPIPS 分數（越低越好，表示更相似）
@@ -1097,8 +1098,9 @@ def calculate_lpips(img1, img2, net='alex'):
         return None
     
     try:
-        # 創建 LPIPS 評估器
-        lpips_metric = lpips.LPIPS(net=net, verbose=False)
+        # 只在未提供評估器時建立一次
+        if lpips_metric is None:
+            lpips_metric = lpips.LPIPS(net=net, verbose=False)
         
         def preprocess_image(img):
             """預處理影像為 LPIPS 需要的格式"""

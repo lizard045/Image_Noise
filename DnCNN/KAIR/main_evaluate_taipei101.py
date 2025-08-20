@@ -109,6 +109,9 @@ def main():
     logger.info('\n開始評估影像品質...')
     logger.info('-' * 80)
     
+    # 預先建立 LPIPS 評估器以避免重複載入模型
+    lpips_metric = util.lpips.LPIPS(net='alex', verbose=False) if util.LPIPS_AVAILABLE else None
+    
     for idx, filename in enumerate(sorted(common_files)):
         original_path = original_dict[filename]
         denoised_path = denoised_dict[filename]
@@ -133,7 +136,7 @@ def main():
             ssim = util.calculate_ssim(img_denoised, img_original, border=args.border)
             
             # 計算新指標
-            lpips_score = util.calculate_lpips(img_denoised, img_original)
+            lpips_score = util.calculate_lpips(img_denoised, img_original, lpips_metric=lpips_metric)
             niqe_score = util.calculate_niqe(img_denoised)
             
             # 儲存結果
