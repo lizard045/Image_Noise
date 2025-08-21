@@ -21,6 +21,7 @@ from processing_utils import _prepare_image
 from gpu_optimizer import GPUOptimizer
 from dual_stream import stable_dual_stream_processing, tile_process_stable, fallback_single_processing
 from residual_refinement import _refine_residual_noise_hotspots, _residual_bilateral_denoise
+from self_supervised_idr import adaptive_idr_denoise
 
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -79,6 +80,7 @@ def main():
     parser.add_argument('--enable_enhanced_features', action='store_true', help='啟用增強版特徵提取和調優')
     parser.add_argument('--optimize_attention_params', action='store_true', help='啟用Attention參數自動調優')
     parser.add_argument('--enable_region_adaptive', action='store_true', help='啟用區域自適應處理 (解決去噪不均勻問題)')
+    parser.add_argument('--enable_idr', action='store_true', help='啟用自監督式迭代降噪')
     parser.add_argument('--monitor_performance', action='store_true')
     args = parser.parse_args()
 
@@ -98,6 +100,7 @@ def main():
     logger.info(f'增強特徵提取: {"啟用" if args.enable_enhanced_features else "停用"}')
     logger.info(f'參數自動調優: {"啟用" if args.optimize_attention_params else "停用"}')
     logger.info(f'區域自適應: {"啟用" if args.enable_region_adaptive else "停用"}')
+    logger.info(f'自監督迭代: {"啟用" if args.enable_idr else "停用"}')
     logger.info('穩定模式: 雙流處理 + 可選增強功能')
     
     # GPU優化器設定
@@ -147,6 +150,7 @@ def main():
         print(f"   參數數量: {num_params:,}")
         print(f"   穩定版本: 雙流處理 + Self-Attention {'啟用' if args.enable_attention else '未啟用'}")
         print(f"   增強功能: {'完整模式' if args.enable_enhanced_features else '標準模式'}")
+        print(f"   自監督迭代: {'啟用' if args.enable_idr else '未啟用'}")
         
         # Attention參數調優 (如果啟用)
         if (args.optimize_attention_params and args.enable_attention and 
@@ -228,6 +232,9 @@ def main():
                 img_E = stable_dual_stream_processing(model, img_L, device, args.noise_level, gpu_optimizer, 
                                                     enable_attention=args.enable_attention,
                                                     enable_region_adaptive=args.enable_region_adaptive)
+            # 自監督式IDR迭代降噪
+            if args.enable_idr:
+                img_E = adaptive_idr_denoise(model, img_E, device, args.noise_level, gpu_optimizer)
             # 二次降噪：殘留噪點熱區精修
             img_E = _refine_residual_noise_hotspots(
                 model, img_L, img_E, device, args.noise_level, gpu_optimizer
@@ -290,6 +297,7 @@ def main():
         print(f"   •  自適應參數: 根據影像特性自動調整雙流參數")
         print(f"   •  邊緣檢測: {'多尺度、多方向增強特徵提取' if args.enable_enhanced_features else '3×3和5×5核融合邊緣檢測'}")
         print(f"   •  Self-Attention: {'修復版注意力機制，智能細節增強' if args.enable_attention else '未啟用，追求高速穩定'}")
+        print(f"   •  IDR迭代: {'自監督式逐輪精修' if args.enable_idr else '未啟用'}")
         print(f"   •  參數調優: {'自動參數尋優，找到最佳鞍點' if args.optimize_attention_params else '使用預設參數'}")
         print(f"   •  特徵提取: {'結構張量+LBP紋理+小波變換' if args.enable_enhanced_features else '傳統Laplacian邊緣'}")
         print(f"   •  記憶體優化: 頻繁清理，避免記憶體累積")
