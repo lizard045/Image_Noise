@@ -89,17 +89,23 @@ def stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_op
         del img_tensor, img_input_low, img_input_high, o_low, o_high
         return final_result
 
+    except torch.cuda.OutOfMemoryError as e:
+        print(f"    雙流處理記憶體不足: {str(e)[:50]}...")
+        raise
     except Exception as e:
         print(f"    雙流處理失敗: {str(e)}, 使用後備處理")
         return fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer)
 
 
-def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention=False, enable_region_adaptive=False):
+def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention=False, enable_region_adaptive=False, tile_size=None):
     """
-    穩定分塊處理
+    穩定分塊處理，必要時遞迴縮小分塊以避免記憶體不足
     """
     h, w, c = img_L.shape
-    tile_h, tile_w = gpu_optimizer.get_optimal_tile_size((h, w))
+    if tile_size is None:
+        tile_h, tile_w = gpu_optimizer.get_optimal_tile_size((h, w))
+    else:
+        tile_h, tile_w = tile_size
     if h <= tile_h and w <= tile_w:
         return stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention, enable_region_adaptive)
 
@@ -118,7 +124,20 @@ def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, e
             end_w = min(start_w + tile_w, w)
             tile = img_L[start_h:end_h, start_w:end_w, :]
             print(f"    處理塊 ({i+1}/{h_tiles}, {j+1}/{w_tiles}) - 尺寸: {tile.shape}")
-            tile_result = stable_dual_stream_processing(model, tile, device, base_noise_level, gpu_optimizer, enable_attention, enable_region_adaptive)
+            try:
+                tile_result = stable_dual_stream_processing(model, tile, device, base_noise_level, gpu_optimizer, enable_attention, enable_region_adaptive)
+            except torch.cuda.OutOfMemoryError:
+                if tile_h <= 64 or tile_w <= 64:
+                    print("    分塊已達最小限制，回傳原始分塊")
+                    tile_result = tile
+                else:
+                    new_tile_h = max(tile_h // 2, 64)
+                    new_tile_w = max(tile_w // 2, 64)
+                    print(f"    分塊處理記憶體不足，縮小至 {new_tile_h}x{new_tile_w}")
+                    tile_result = tile_process_stable(
+                        model, tile, device, base_noise_level, gpu_optimizer,
+                        enable_attention, enable_region_adaptive, (new_tile_h, new_tile_w)
+                    )
             if i == 0 and j == 0:
                 result_img[start_h:end_h, start_w:end_w, :] = tile_result
             else:
@@ -131,7 +150,7 @@ def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, e
     return result_img
 
 
-def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer):
+def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer, tile_size=None):
     """後備單流處理方法"""
     try:
         print(f"    使用後備單流處理 (noise_level={base_noise_level})")
@@ -146,6 +165,11 @@ def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optim
         del img_tensor, img_input, img_output
         gpu_optimizer.cleanup_memory()
         return result
+    except torch.cuda.OutOfMemoryError:
+        print("    單流處理記憶體不足，改用分塊處理")
+        return tile_process_stable(
+            model, img_L, device, base_noise_level, gpu_optimizer, tile_size=tile_size
+        )
     except Exception as e:
         print(f"    後備處理也失敗: {str(e)}, 返回原圖")
         return img_L

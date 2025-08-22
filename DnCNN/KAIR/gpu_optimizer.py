@@ -36,7 +36,11 @@ class GPUOptimizer:
             cudnn.deterministic = False
 
             torch.cuda.empty_cache()
-            os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:256'
+            os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+            try:
+                torch.cuda.set_per_process_memory_fraction(0.8, 0)
+            except Exception as e:
+                print(f"    set_per_process_memory_fraction失敗: {str(e)[:40]}...")
 
             self.gpu_info = {
                 'name': torch.cuda.get_device_name(0),
@@ -120,12 +124,14 @@ class GPUOptimizer:
         """計算最佳分塊尺寸 - 穩定優先"""
         h, w = img_size
 
+        # 進一步縮小初始分塊尺寸，降低單塊記憶體需求
         if self.gpu_info['memory_total'] >= 8.0:
-            max_tile_size = 512  # 保守設置
+            max_tile_size = 256  # 原為512，為了8GB VRAM改為256
         elif self.gpu_info['memory_total'] >= 6.0:
-            max_tile_size = 384
+            max_tile_size = 192
         else:
-            max_tile_size = 256
+            max_tile_size = 128
+
 
         tile_h = min(max_tile_size, h)
         tile_w = min(max_tile_size, w)

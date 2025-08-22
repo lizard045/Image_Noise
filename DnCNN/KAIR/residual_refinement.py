@@ -1,11 +1,10 @@
 import cv2
 import numpy as np
-import torch
-from utils import utils_image as util
-from processing_utils import autocast_if_amp
+
+from dual_stream import tile_process_stable
 
 
-def _refine_residual_noise_hotspots(model, original_img, current_result, device, base_noise_level, gpu_optimizer):
+def _refine_residual_noise_hotspots(model, original_img, current_result, device, base_noise_level, gpu_optimizer, tile_size=None):
     """全圖殘留噪點熱區精修"""
     if len(original_img.shape) == 2:
         base_bgr = original_img[:, :, np.newaxis]
@@ -38,14 +37,10 @@ def _refine_residual_noise_hotspots(model, original_img, current_result, device,
         return current_result
     print(f"    偵測到殘留噪點熱區，啟用精修 (score={trigger_score:.2f})")
     sigma_refine = np.clip(base_noise_level * 2.2, 0, 255)
-    img_tensor = util.uint2tensor4(base_bgr).to(device)
-    noise_level_norm = float(sigma_refine) / 255.0
-    noise_tensor = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), noise_level_norm).to(device)
-    img_input = torch.cat([img_tensor, noise_tensor], dim=1)
-    with torch.no_grad():
-        with autocast_if_amp(gpu_optimizer.use_amp):
-            refined_out = model(img_input)
-    refined_np = util.tensor2uint(refined_out)
+    refined_np = tile_process_stable(
+        model, base_bgr, device, sigma_refine, gpu_optimizer,
+        tile_size=tile_size,
+    )
     weight = np.zeros((h, w), dtype=np.float32)
     heat_valid = noise_heat * vignette_mask.astype(np.float32)
     thresh = max(0.35, float(cv2.threshold((heat_valid * 255).astype(np.uint8), 0, 255, cv2.THRESH_OTSU)[0]) / 255.0)

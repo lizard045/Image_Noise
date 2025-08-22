@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
 
-from dual_stream import stable_dual_stream_processing
+from dual_stream import tile_process_stable
 
 
-def adaptive_idr_denoise(model, init_img, device, base_noise_level, gpu_optimizer, max_iter=3):
+def adaptive_idr_denoise(model, init_img, device, base_noise_level, gpu_optimizer, max_iter=3,tile_size=None):
     """自監督式迭代降噪
 
     以 IDR 策略在殘差仍具結構時降低 noise_level 進行多輪精修。
@@ -25,9 +25,11 @@ def adaptive_idr_denoise(model, init_img, device, base_noise_level, gpu_optimize
     noise_level = base_noise_level * 0.8
 
     for _ in range(max_iter):
-        refined = stable_dual_stream_processing(
+        refined = tile_process_stable(
             model, current, device, noise_level, gpu_optimizer,
-            enable_attention=False, enable_region_adaptive=False
+            enable_attention=False,
+            enable_region_adaptive=False,
+            tile_size=tile_size,
         )
 
         residual = cv2.absdiff(current, refined)
@@ -40,6 +42,6 @@ def adaptive_idr_denoise(model, init_img, device, base_noise_level, gpu_optimize
             break
 
         current = refined
-        noise_level = noise_level * 0.8
+        noise_level *= 0.8
 
     return current

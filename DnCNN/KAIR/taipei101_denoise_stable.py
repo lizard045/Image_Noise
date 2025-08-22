@@ -9,6 +9,7 @@
 
 import os
 import argparse
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 import logging
 import torch
 from collections import OrderedDict
@@ -74,7 +75,7 @@ def main():
     parser.add_argument('--drunet_model_path', type=str, default='model_zoo/drunet_color.pth')
     parser.add_argument('--input_dir', type=str, default='testsets/TAIPEI_NO_TUNE_8K')
     parser.add_argument('--output_dir', type=str, default='taipei101_stable_denoised')
-    parser.add_argument('--noise_level', type=float, default=2.0)
+    parser.add_argument('--noise_level', type=float, default=1.3)
     parser.add_argument('--device', type=str, default='auto')
     parser.add_argument('--enable_attention', action='store_true', help='啟用修復版Self-Attention增強')
     parser.add_argument('--enable_enhanced_features', action='store_true', help='啟用增強版特徵提取和調優')
@@ -82,6 +83,13 @@ def main():
     parser.add_argument('--enable_region_adaptive', action='store_true', help='啟用區域自適應處理 (解決去噪不均勻問題)')
     parser.add_argument('--enable_idr', action='store_true', help='啟用自監督式迭代降噪')
     parser.add_argument('--monitor_performance', action='store_true')
+    parser.add_argument('--batch_size', type=int, default=1, help='一次處理的影像數量')
+    parser.add_argument('--channel_scale', type=float, default=1.0, help='模型通道縮放比例')
+    parser.add_argument('--num_blocks', type=int, default=4, help='UNet殘差區塊數量')
+    parser.add_argument('--single_stream', action='store_true', help='強制改用單流處理以節省記憶體')
+    parser.add_argument('--tile_size', type=str, default=None, help='手動指定分塊尺寸，例如 256x256')
+    parser.add_argument('--idr_tile_size', type=str, default=None, help='IDR 迭代分塊尺寸')
+    parser.add_argument('--refine_tile_size', type=str, default=None, help='殘留噪點精修分塊尺寸')
     args = parser.parse_args()
 
     # 建立輸出目錄和日誌
@@ -101,6 +109,29 @@ def main():
     logger.info(f'參數自動調優: {"啟用" if args.optimize_attention_params else "停用"}')
     logger.info(f'區域自適應: {"啟用" if args.enable_region_adaptive else "停用"}')
     logger.info(f'自監督迭代: {"啟用" if args.enable_idr else "停用"}')
+    logger.info(f'通道縮放比例: {args.channel_scale}')
+    logger.info(f'UNet區塊數: {args.num_blocks}')
+    logger.info(f'強制單流: {"啟用" if args.single_stream else "停用"}')
+
+    def _parse_tile(arg, name):
+        if not arg:
+            return None
+        try:
+            parts = arg.lower().split('x')
+            if len(parts) == 2:
+                ts = (int(parts[0]), int(parts[1]))
+            else:
+                size = int(parts[0])
+                ts = (size, size)
+            logger.info(f'{name}分塊尺寸: {ts[0]}x{ts[1]}')
+            return ts
+        except ValueError:
+            logger.error(f'無效的{name}參數: {arg}')
+            return None
+
+    tile_size = _parse_tile(args.tile_size, '主流程')
+    idr_tile_size = _parse_tile(args.idr_tile_size, 'IDR')
+    refine_tile_size = _parse_tile(args.refine_tile_size, '熱區精修')
     logger.info('穩定模式: 雙流處理 + 可選增強功能')
     
     # GPU優化器設定
@@ -130,7 +161,9 @@ def main():
     try:
         logger.info('載入 DRUNet 去噪模型...')
         
-        model = UNetRes(in_nc=4, out_nc=3, nc=[64, 128, 256, 512], nb=4,
+        base_nc = [int(64 * args.channel_scale), int(128 * args.channel_scale),
+                   int(256 * args.channel_scale), int(512 * args.channel_scale)]
+        model = UNetRes(in_nc=4, out_nc=3, nc=base_nc, nb=args.num_blocks,
                         act_mode='R', downsample_mode='strideconv',
                         upsample_mode='convtranspose', bias=False, use_nonlocal=True)
         
@@ -205,64 +238,90 @@ def main():
     
     # 處理影像
     logger.info('開始處理影像 (穩定模式)...')
-    print(f"  開始處理 {len(image_paths)} 張影像")
-    
+    total_images = len(image_paths)
+    num_batches = (total_images + args.batch_size - 1) // args.batch_size
+    print(f"  開始處理 {total_images} 張影像 (批次大小={args.batch_size})")
+
     processed_count = 0
     failed_count = 0
     start_time = time.time()
-    
-    for idx, img_path in enumerate(image_paths):
-        img_name = os.path.basename(img_path)
-        
-        try:
-            logger.info(f'處理影像 {idx+1}/{len(image_paths)}: {img_name}')
-            img_start_time = time.time()
-            
-            # 載入影像並統一格式
-            img_L = _prepare_image(util.imread_uint(img_path, n_channels=3))
-            original_shape = img_L.shape
-            print(f"    影像尺寸: {original_shape}")
-            
-            # 根據圖片大小選擇處理方式
-            if gpu_optimizer.should_tile_process(original_shape[:2]):
-                img_E = tile_process_stable(model, img_L, device, args.noise_level, gpu_optimizer, 
-                                          enable_attention=args.enable_attention, 
-                                          enable_region_adaptive=args.enable_region_adaptive)
-            else:
-                img_E = stable_dual_stream_processing(model, img_L, device, args.noise_level, gpu_optimizer, 
-                                                    enable_attention=args.enable_attention,
-                                                    enable_region_adaptive=args.enable_region_adaptive)
-            # 自監督式IDR迭代降噪
-            if args.enable_idr:
-                img_E = adaptive_idr_denoise(model, img_E, device, args.noise_level, gpu_optimizer)
-            # 二次降噪：殘留噪點熱區精修
-            img_E = _refine_residual_noise_hotspots(
-                model, img_L, img_E, device, args.noise_level, gpu_optimizer
-            )
-            # 二次降噪：殘差域雙邊濾波
-            img_E = _residual_bilateral_denoise(img_L, img_E)
-            
-            # 確保輸出影像尺寸正確
-            if img_E.shape != original_shape:
-                logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
-            
-            # 儲存結果
-            output_path = os.path.join(args.output_dir, img_name)
-            util.imsave(img_E, output_path)
-            
-            processed_count += 1
-            img_time = time.time() - img_start_time
-            print(f"  ({idx+1}/{len(image_paths)}) {img_name} - 處理完成 ({img_time:.1f}秒)")
-            
-            # 每3張清理一次記憶體
-            if idx % 3 == 0:
-                gpu_optimizer.cleanup_memory()
-            
-        except Exception as e:
-            failed_count += 1
-            logger.error(f'{img_name} - 處理失敗: {str(e)}')
-            print(f"  ({idx+1}/{len(image_paths)}) {img_name} - 處理失敗: {str(e)}")
-            continue
+    with torch.no_grad():
+        for batch_idx in range(num_batches):
+            batch_start = batch_idx * args.batch_size
+            batch_paths = image_paths[batch_start:batch_start + args.batch_size]
+            print(f"\n  處理批次 {batch_idx + 1}/{num_batches} (包含 {len(batch_paths)} 張)")
+
+            for idx, img_path in enumerate(batch_paths, start=batch_start):
+                img_name = os.path.basename(img_path)
+
+                try:
+                    logger.info(f'處理影像 {idx+1}/{total_images}: {img_name}')
+                    img_start_time = time.time()
+
+                    # 載入影像並統一格式
+                    img_L = _prepare_image(util.imread_uint(img_path, n_channels=3))
+                    original_shape = img_L.shape
+                    print(f"    影像尺寸: {original_shape}")
+
+                    # 根據圖片大小選擇處理方式
+                    if args.single_stream:
+                        img_E = fallback_single_processing(model, img_L, device, args.noise_level, gpu_optimizer, tile_size)
+                    elif gpu_optimizer.should_tile_process(original_shape[:2]):
+                        img_E = tile_process_stable(
+                            model, img_L, device, args.noise_level, gpu_optimizer,
+                            enable_attention=args.enable_attention,
+                            enable_region_adaptive=args.enable_region_adaptive,
+                            tile_size=tile_size,
+                        )
+                    else:
+                        try:
+                            img_E = stable_dual_stream_processing(model, img_L, device, args.noise_level, gpu_optimizer,
+                                                                enable_attention=args.enable_attention,
+                                                                enable_region_adaptive=args.enable_region_adaptive)
+                        except torch.cuda.OutOfMemoryError:
+                            print("    雙流處理記憶體不足，改用分塊處理")
+                            img_E = tile_process_stable(
+                                model, img_L, device, args.noise_level, gpu_optimizer,
+                                enable_attention=args.enable_attention,
+                                enable_region_adaptive=args.enable_region_adaptive,
+                                tile_size=tile_size,
+                            )
+                    # 自監督式IDR迭代降噪
+                    if args.enable_idr:
+                        img_E = adaptive_idr_denoise(
+                            model, img_E, device, args.noise_level, gpu_optimizer,
+                            tile_size=idr_tile_size,
+                        )
+                    # 二次降噪：殘留噪點熱區精修
+                    img_E = _refine_residual_noise_hotspots(
+                        model, img_L, img_E, device, args.noise_level, gpu_optimizer,
+                        tile_size=refine_tile_size,
+                    )
+                    # 二次降噪：殘差域雙邊濾波
+                    img_E = _residual_bilateral_denoise(img_L, img_E)
+
+                    # 確保輸出影像尺寸正確
+                    if img_E.shape != original_shape:
+                        logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
+
+                    # 儲存結果
+                    output_path = os.path.join(args.output_dir, img_name)
+                    util.imsave(img_E, output_path)
+
+                    processed_count += 1
+                    img_time = time.time() - img_start_time
+                    print(f"  ({idx+1}/{total_images}) {img_name} - 處理完成 ({img_time:.1f}秒)")
+
+                except Exception as e:
+                    failed_count += 1
+                    logger.error(f'{img_name} - 處理失敗: {str(e)}')
+                    print(f"  ({idx+1}/{total_images}) {img_name} - 處理失敗: {str(e)}")
+                    continue
+
+            # 每個批次後清理記憶體
+            gpu_optimizer.cleanup_memory()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
     
     # 最終記憶體清理
     gpu_optimizer.cleanup_memory()
