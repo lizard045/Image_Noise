@@ -17,7 +17,7 @@ def stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_op
     """
     try:
         img_tensor = util.uint2tensor4(img_L).to(device)
-        gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(img_L, cv2.COLOR_RGB2GRAY)
         laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
 
         if laplacian_var < 50:
@@ -26,6 +26,10 @@ def stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_op
             sigma_low_ratio, sigma_high_ratio = 0.4, 1.8
         else:
             sigma_low_ratio, sigma_high_ratio = 0.3, 1.5
+
+        max_ratio = max(1.0, 0.8 + base_noise_level * 0.5)
+        sigma_high_ratio = min(sigma_high_ratio, max_ratio)
+        sigma_low_ratio = min(sigma_low_ratio, max_ratio * 0.5)
 
         sigma_low = base_noise_level * sigma_low_ratio
         sigma_high = base_noise_level * sigma_high_ratio
@@ -195,7 +199,7 @@ def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gp
     區域自適應處理 - 解決去噪效果不均勻問題
     """
     print(f"      啟用區域自適應分析...")
-    gray = cv2.cvtColor(img_L, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img_L, cv2.COLOR_RGB2GRAY)
     h, w = gray.shape
     kernel = np.ones((7, 7), np.float32) / 49
     local_mean = cv2.filter2D(gray.astype(np.float32), -1, kernel)
@@ -229,8 +233,11 @@ def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gp
         pixel_count = np.sum(region_mask)
         if pixel_count < total_pixels * 0.01:
             continue
-        sigma_low = base_noise_level * config['sigma_low_ratio']
-        sigma_high = base_noise_level * config['sigma_high_ratio']
+        max_ratio = max(1.0, 0.8 + base_noise_level * 0.5)
+        low_ratio = min(config['sigma_low_ratio'], max_ratio * 0.5)
+        high_ratio = min(config['sigma_high_ratio'], max_ratio)
+        sigma_low = base_noise_level * low_ratio
+        sigma_high = base_noise_level * high_ratio
         noise_level_low = sigma_low / 255.0
         noise_tensor_low = torch.full((1, 1, img_tensor.shape[2], img_tensor.shape[3]), noise_level_low).to(device)
         img_input_low = torch.cat([img_tensor, noise_tensor_low], dim=1)

@@ -18,7 +18,7 @@ import time
 from utils import utils_logger
 from utils import utils_image as util
 from models.network_unet import UNetRes
-from processing_utils import _prepare_image
+from processing_utils import _prepare_image, estimate_noise_level
 from gpu_optimizer import GPUOptimizer
 from dual_stream import stable_dual_stream_processing, tile_process_stable, fallback_single_processing
 from residual_refinement import _refine_residual_noise_hotspots, _residual_bilateral_denoise
@@ -75,7 +75,14 @@ def main():
     parser.add_argument('--drunet_model_path', type=str, default='model_zoo/drunet_color.pth')
     parser.add_argument('--input_dir', type=str, default='testsets/TAIPEI_NO_TUNE_8K')
     parser.add_argument('--output_dir', type=str, default='taipei101_stable_denoised')
-    parser.add_argument('--noise_level', type=float, default=1.3)
+    parser.add_argument('--noise_level', type=float, default=None,
+                        help='指定固定雜訊等級，未提供則自動估計')
+    parser.add_argument('--max_auto_noise', type=float, default=25.0,
+                        help='自動估計雜訊的上限值')
+    parser.add_argument('--auto_skip_low_noise', action='store_true',
+                        help='噪聲低於閾值時自動跳過IDR與雙邊濾波')
+    parser.add_argument('--low_noise_threshold', type=float, default=5.0,
+                        help='判定為低噪聲的閾值')
     parser.add_argument('--device', type=str, default='auto')
     parser.add_argument('--enable_attention', action='store_true', help='啟用修復版Self-Attention增強')
     parser.add_argument('--enable_enhanced_features', action='store_true', help='啟用增強版特徵提取和調優')
@@ -103,7 +110,10 @@ def main():
     logger.info(f'DRUNet模型路徑: {args.drunet_model_path}')
     logger.info(f'輸入目錄: {args.input_dir}')
     logger.info(f'輸出目錄: {args.output_dir}')
-    logger.info(f'基礎雜訊等級: {args.noise_level}')
+    logger.info(f'雜訊等級: {args.noise_level if args.noise_level is not None else "自動估計"}')
+    logger.info(f'自動雜訊上限: {args.max_auto_noise}')
+    if args.auto_skip_low_noise:
+        logger.info(f'低噪聲自動跳過後處理: 閾值 {args.low_noise_threshold}')
     logger.info(f'Self-Attention: {"啟用 (修復版)" if args.enable_attention else "停用"}')
     logger.info(f'增強特徵提取: {"啟用" if args.enable_enhanced_features else "停用"}')
     logger.info(f'參數自動調優: {"啟用" if args.optimize_attention_params else "停用"}')
@@ -263,42 +273,56 @@ def main():
                     original_shape = img_L.shape
                     print(f"    影像尺寸: {original_shape}")
 
+                    # 自動估計雜訊強度（可被CLI參數覆寫）
+                    est_noise = estimate_noise_level(img_L, max_sigma=args.max_auto_noise)
+                    noise_level = args.noise_level if args.noise_level is not None else est_noise
+                    print(f"    使用雜訊等級: {noise_level:.2f}{' (自動估計)' if args.noise_level is None else ''}")
+                    low_noise = args.auto_skip_low_noise and noise_level <= args.low_noise_threshold
+                    if low_noise:
+                        print(f"    噪聲低於閾值({args.low_noise_threshold}), 跳過IDR與後續濾波")
+
                     # 根據圖片大小選擇處理方式
                     if args.single_stream:
-                        img_E = fallback_single_processing(model, img_L, device, args.noise_level, gpu_optimizer, tile_size)
+                        img_E = fallback_single_processing(model, img_L, device, noise_level, gpu_optimizer, tile_size)
                     elif gpu_optimizer.should_tile_process(original_shape[:2]):
                         img_E = tile_process_stable(
-                            model, img_L, device, args.noise_level, gpu_optimizer,
+                            model, img_L, device, noise_level, gpu_optimizer,
                             enable_attention=args.enable_attention,
                             enable_region_adaptive=args.enable_region_adaptive,
                             tile_size=tile_size,
                         )
                     else:
                         try:
-                            img_E = stable_dual_stream_processing(model, img_L, device, args.noise_level, gpu_optimizer,
+                            img_E = stable_dual_stream_processing(model, img_L, device, noise_level, gpu_optimizer,
                                                                 enable_attention=args.enable_attention,
                                                                 enable_region_adaptive=args.enable_region_adaptive)
                         except torch.cuda.OutOfMemoryError:
                             print("    雙流處理記憶體不足，改用分塊處理")
                             img_E = tile_process_stable(
-                                model, img_L, device, args.noise_level, gpu_optimizer,
+                                model, img_L, device, noise_level, gpu_optimizer,
                                 enable_attention=args.enable_attention,
                                 enable_region_adaptive=args.enable_region_adaptive,
                                 tile_size=tile_size,
                             )
                     # 自監督式IDR迭代降噪
-                    if args.enable_idr:
+                    if args.enable_idr and not low_noise:
                         img_E = adaptive_idr_denoise(
-                            model, img_E, device, args.noise_level, gpu_optimizer,
+                            model, img_E, device, noise_level, gpu_optimizer,
                             tile_size=idr_tile_size,
                         )
-                    # 二次降噪：殘留噪點熱區精修
-                    img_E = _refine_residual_noise_hotspots(
-                        model, img_L, img_E, device, args.noise_level, gpu_optimizer,
-                        tile_size=refine_tile_size,
-                    )
-                    # 二次降噪：殘差域雙邊濾波
-                    img_E = _residual_bilateral_denoise(img_L, img_E)
+                    elif args.enable_idr and low_noise:
+                        logger.info(f'{img_name} - 噪聲低於閾值，略過IDR迭代')
+
+                    if not low_noise:
+                        # 二次降噪：殘留噪點熱區精修
+                        img_E = _refine_residual_noise_hotspots(
+                            model, img_L, img_E, device, noise_level, gpu_optimizer,
+                            tile_size=refine_tile_size,
+                        )
+                        # 二次降噪：殘差域雙邊濾波
+                        img_E = _residual_bilateral_denoise(img_L, img_E)
+                    else:
+                        logger.info(f'{img_name} - 噪聲低於閾值，略過熱區精修與雙邊濾波')
 
                     # 確保輸出影像尺寸正確
                     if img_E.shape != original_shape:

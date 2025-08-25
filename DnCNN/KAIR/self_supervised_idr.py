@@ -33,7 +33,7 @@ def adaptive_idr_denoise(model, init_img, device, base_noise_level, gpu_optimize
         )
 
         residual = cv2.absdiff(current, refined)
-        residual_gray = cv2.cvtColor(residual, cv2.COLOR_BGR2GRAY)
+        residual_gray = cv2.cvtColor(residual, cv2.COLOR_RGB2GRAY)
         local_var = cv2.Laplacian(residual_gray, cv2.CV_32F).var()
         residual_std = residual_gray.std() + 1e-6
 

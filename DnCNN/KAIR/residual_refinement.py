@@ -11,7 +11,7 @@ def _refine_residual_noise_hotspots(model, original_img, current_result, device,
         gray = original_img
     else:
         base_bgr = original_img
-        gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY)
     h, w = gray.shape
     if h < 200 or w < 200:
         return current_result
@@ -32,6 +32,8 @@ def _refine_residual_noise_hotspots(model, original_img, current_result, device,
     noise_heat = 0.6 * (highpass / (edge + eps)) + 0.4 * (local_std / (np.mean(local_std[vignette_mask]) + eps))
     noise_heat = np.clip(noise_heat, 0, np.percentile(noise_heat, 99))
     noise_heat = noise_heat / (np.max(noise_heat) + eps)
+    bright_mask = gray > 235
+    noise_heat[bright_mask] *= 0.3
     trigger_score = np.percentile(noise_heat[vignette_mask], 92)
     if trigger_score < 0.45:
         return current_result
@@ -45,6 +47,7 @@ def _refine_residual_noise_hotspots(model, original_img, current_result, device,
     heat_valid = noise_heat * vignette_mask.astype(np.float32)
     thresh = max(0.35, float(cv2.threshold((heat_valid * 255).astype(np.uint8), 0, 255, cv2.THRESH_OTSU)[0]) / 255.0)
     weight[heat_valid >= thresh] = heat_valid[heat_valid >= thresh]
+    weight[bright_mask] = 0
     weight = cv2.GaussianBlur(weight, (31, 31), 7.0)
     weight = np.clip(weight, 0.0, 1.0)
     weight_3d = weight[..., np.newaxis]
@@ -61,7 +64,7 @@ def _residual_bilateral_denoise(original_img, current_result, sigma_color=30, si
     """殘差域雙邊濾波"""
     residual = cv2.absdiff(original_img, current_result)
     if residual.ndim == 3:
-        residual_gray = cv2.cvtColor(residual, cv2.COLOR_BGR2GRAY)
+        residual_gray = cv2.cvtColor(residual, cv2.COLOR_RGB2GRAY)
     else:
         residual_gray = residual
     norm_residual = residual_gray.astype(np.float32)
@@ -69,5 +72,7 @@ def _residual_bilateral_denoise(original_img, current_result, sigma_color=30, si
     norm_residual = cv2.GaussianBlur(norm_residual, (0, 0), 1.5)
     filtered = cv2.bilateralFilter(current_result, d=5, sigmaColor=sigma_color, sigmaSpace=sigma_space)
     weight = norm_residual[..., np.newaxis]
+    bright_mask = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY) > 235
+    weight[bright_mask[..., np.newaxis]] = 0
     blended = weight * filtered.astype(np.float32) + (1 - weight) * current_result.astype(np.float32)
     return np.clip(blended, 0, 255).astype(np.uint8)
