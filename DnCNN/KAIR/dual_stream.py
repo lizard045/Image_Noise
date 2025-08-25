@@ -114,12 +114,13 @@ def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, e
         return stable_dual_stream_processing(model, img_L, device, base_noise_level, gpu_optimizer, enable_attention, enable_region_adaptive)
 
     print(f"  穩定分塊處理: {h}x{w} -> {tile_h}x{tile_w}")
-    overlap = 64
+    overlap = max(16, min(64, tile_h // 4, tile_w // 4))
     h_tiles = (h - 1) // (tile_h - overlap) + 1
     w_tiles = (w - 1) // (tile_w - overlap) + 1
     print(f"  分塊數量: {h_tiles}x{w_tiles} = {h_tiles * w_tiles} 塊")
 
-    result_img = np.zeros_like(img_L)
+    result_img = np.zeros((h, w, c), dtype=np.float32)
+    weight_map = np.zeros((h, w, 1), dtype=np.float32)
     for i in range(h_tiles):
         for j in range(w_tiles):
             start_h = i * (tile_h - overlap)
@@ -142,16 +143,24 @@ def tile_process_stable(model, img_L, device, base_noise_level, gpu_optimizer, e
                         model, tile, device, base_noise_level, gpu_optimizer,
                         enable_attention, enable_region_adaptive, (new_tile_h, new_tile_w)
                     )
-            if i == 0 and j == 0:
-                result_img[start_h:end_h, start_w:end_w, :] = tile_result
-            else:
-                actual_start_h = start_h + (overlap // 2 if i > 0 else 0)
-                actual_start_w = start_w + (overlap // 2 if j > 0 else 0)
-                tile_start_h = overlap // 2 if i > 0 else 0
-                tile_start_w = overlap // 2 if j > 0 else 0
-                result_img[actual_start_h:end_h, actual_start_w:end_w, :] = tile_result[tile_start_h:, tile_start_w:, :]
+            tile_result = tile_result.astype(np.float32)
+            th, tw = tile_result.shape[:2]
+            tile_weight = np.ones((th, tw, 1), dtype=np.float32)
+            ov_y = min(overlap, th)
+            ov_x = min(overlap, tw)
+            if i > 0:
+                tile_weight[:ov_y, :, :] *= np.linspace(0, 1, ov_y)[:, None, None]
+            if i < h_tiles - 1:
+                tile_weight[th - ov_y:, :, :] *= np.linspace(1, 0, ov_y)[:, None, None]
+            if j > 0:
+                tile_weight[:, :ov_x, :] *= np.linspace(0, 1, ov_x)[None, :, None]
+            if j < w_tiles - 1:
+                tile_weight[:, tw - ov_x:, :] *= np.linspace(1, 0, ov_x)[None, :, None]
+            result_img[start_h:end_h, start_w:end_w, :] += tile_result * tile_weight
+            weight_map[start_h:end_h, start_w:end_w, :] += tile_weight
+    result_img = result_img / np.maximum(weight_map, 1e-8)
     gpu_optimizer.cleanup_memory()
-    return result_img
+    return np.clip(result_img, 0, 255).astype(np.uint8)
 
 
 def fallback_single_processing(model, img_L, device, base_noise_level, gpu_optimizer, tile_size=None):
@@ -225,7 +234,7 @@ def _apply_region_adaptive_processing(model, img_L, device, base_noise_level, gp
     region_results = []
     region_configs = [
         {'name': '平滑區域', 'sigma_low_ratio': 0.15, 'sigma_high_ratio': 0.9},
-        {'name': '細節區域', 'sigma_low_ratio': 0.4, 'sigma_high_ratio': 2.0},
+        {'name': '細節區域', 'sigma_low_ratio': 0.35, 'sigma_high_ratio': 1.3},
         {'name': '邊緣區域', 'sigma_low_ratio': 0.35, 'sigma_high_ratio': 1.6}
     ]
     for region_id, config in enumerate(region_configs):

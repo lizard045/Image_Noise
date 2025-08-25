@@ -4,8 +4,19 @@ import numpy as np
 from dual_stream import tile_process_stable
 
 
-def _refine_residual_noise_hotspots(model, original_img, current_result, device, base_noise_level, gpu_optimizer, tile_size=None):
-    """全圖殘留噪點熱區精修"""
+def _refine_residual_noise_hotspots(
+    
+    model,
+    original_img,
+    current_result,
+    device,
+    base_noise_level,
+    gpu_optimizer,
+    enable_attention=False,
+    enable_region_adaptive=False,
+    tile_size=None,
+):
+    """全圖殘留噪點熱區精修，可選擇套用Self-Attention或區域自適應"""
     if len(original_img.shape) == 2:
         base_bgr = original_img[:, :, np.newaxis]
         gray = original_img
@@ -40,7 +51,13 @@ def _refine_residual_noise_hotspots(model, original_img, current_result, device,
     print(f"    偵測到殘留噪點熱區，啟用精修 (score={trigger_score:.2f})")
     sigma_refine = np.clip(base_noise_level * 2.2, 0, 255)
     refined_np = tile_process_stable(
-        model, base_bgr, device, sigma_refine, gpu_optimizer,
+        model,
+        base_bgr,
+        device,
+        sigma_refine,
+        gpu_optimizer,
+        enable_attention=enable_attention,
+        enable_region_adaptive=enable_region_adaptive,
         tile_size=tile_size,
     )
     weight = np.zeros((h, w), dtype=np.float32)
@@ -70,9 +87,13 @@ def _residual_bilateral_denoise(original_img, current_result, sigma_color=30, si
     norm_residual = residual_gray.astype(np.float32)
     norm_residual = norm_residual / (np.max(norm_residual) + 1e-6)
     norm_residual = cv2.GaussianBlur(norm_residual, (0, 0), 1.5)
+    # 適度壓縮高強度殘差的權重以保留細節
+    weight = norm_residual / (norm_residual + 0.2)
+    weight = np.clip(weight, 0.0, 1.0)[..., np.newaxis]
     filtered = cv2.bilateralFilter(current_result, d=5, sigmaColor=sigma_color, sigmaSpace=sigma_space)
-    weight = norm_residual[..., np.newaxis]
     bright_mask = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY) > 235
     weight[bright_mask[..., np.newaxis]] = 0
+    # 適度壓縮高強度殘差的權重以保留細節
+    weight = norm_residual[..., np.newaxis]
     blended = weight * filtered.astype(np.float32) + (1 - weight) * current_result.astype(np.float32)
     return np.clip(blended, 0, 255).astype(np.uint8)

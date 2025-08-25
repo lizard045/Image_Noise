@@ -75,7 +75,7 @@ def main():
     parser.add_argument('--drunet_model_path', type=str, default='model_zoo/drunet_color.pth')
     parser.add_argument('--input_dir', type=str, default='testsets/TAIPEI_NO_TUNE_8K')
     parser.add_argument('--output_dir', type=str, default='taipei101_stable_denoised')
-    parser.add_argument('--noise_level', type=float, default=None,
+    parser.add_argument('--noise_level', type=float, default=1.0,
                         help='指定固定雜訊等級，未提供則自動估計')
     parser.add_argument('--max_auto_noise', type=float, default=25.0,
                         help='自動估計雜訊的上限值')
@@ -316,7 +316,14 @@ def main():
                     if not low_noise:
                         # 二次降噪：殘留噪點熱區精修
                         img_E = _refine_residual_noise_hotspots(
-                            model, img_L, img_E, device, noise_level, gpu_optimizer,
+                            model,
+                            img_L,
+                            img_E,
+                            device,
+                            args.noise_level,
+                            gpu_optimizer,
+                            enable_attention=args.enable_attention,
+                            enable_region_adaptive=args.enable_region_adaptive,
                             tile_size=refine_tile_size,
                         )
                         # 二次降噪：殘差域雙邊濾波
