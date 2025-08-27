@@ -22,7 +22,7 @@ from processing_utils import _prepare_image, estimate_noise_level
 from gpu_optimizer import GPUOptimizer
 from dual_stream import stable_dual_stream_processing, tile_process_stable, fallback_single_processing
 from residual_refinement import _refine_residual_noise_hotspots, _residual_bilateral_denoise
-from self_supervised_idr import adaptive_idr_denoise
+from self_supervised_idr import adaptive_idr_denoise, pyramid_idr_denoise
 
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -75,7 +75,7 @@ def main():
     parser.add_argument('--drunet_model_path', type=str, default='model_zoo/drunet_color.pth')
     parser.add_argument('--input_dir', type=str, default='testsets/TAIPEI_NO_TUNE_8K')
     parser.add_argument('--output_dir', type=str, default='taipei101_stable_denoised')
-    parser.add_argument('--noise_level', type=float, default=1.0,
+    parser.add_argument('--noise_level', type=float, default=2.5,
                         help='指定固定雜訊等級，未提供則自動估計')
     parser.add_argument('--max_auto_noise', type=float, default=25.0,
                         help='自動估計雜訊的上限值')
@@ -89,6 +89,8 @@ def main():
     parser.add_argument('--optimize_attention_params', action='store_true', help='啟用Attention參數自動調優')
     parser.add_argument('--enable_region_adaptive', action='store_true', help='啟用區域自適應處理 (解決去噪不均勻問題)')
     parser.add_argument('--enable_idr', action='store_true', help='啟用自監督式迭代降噪')
+    parser.add_argument('--enable_pyramid_idr', action='store_true', help='啟用金字塔式 IDR 流程')
+    parser.add_argument('--pyramid_levels', type=int, default=2, help='金字塔式 IDR 層數')
     parser.add_argument('--monitor_performance', action='store_true')
     parser.add_argument('--batch_size', type=int, default=1, help='一次處理的影像數量')
     parser.add_argument('--channel_scale', type=float, default=1.0, help='模型通道縮放比例')
@@ -96,6 +98,7 @@ def main():
     parser.add_argument('--single_stream', action='store_true', help='強制改用單流處理以節省記憶體')
     parser.add_argument('--tile_size', type=str, default=None, help='手動指定分塊尺寸，例如 256x256')
     parser.add_argument('--idr_tile_size', type=str, default=None, help='IDR 迭代分塊尺寸')
+    parser.add_argument('--idr_tile_schedule', type=str, default=None, help='IDR 分塊尺寸排程，例如 "None,256,128"')
     parser.add_argument('--refine_tile_size', type=str, default=None, help='殘留噪點精修分塊尺寸')
     args = parser.parse_args()
 
@@ -119,6 +122,7 @@ def main():
     logger.info(f'參數自動調優: {"啟用" if args.optimize_attention_params else "停用"}')
     logger.info(f'區域自適應: {"啟用" if args.enable_region_adaptive else "停用"}')
     logger.info(f'自監督迭代: {"啟用" if args.enable_idr else "停用"}')
+    logger.info(f'金字塔式IDR: {"啟用" if args.enable_pyramid_idr else "停用"}')
     logger.info(f'通道縮放比例: {args.channel_scale}')
     logger.info(f'UNet區塊數: {args.num_blocks}')
     logger.info(f'強制單流: {"啟用" if args.single_stream else "停用"}')
@@ -139,9 +143,28 @@ def main():
             logger.error(f'無效的{name}參數: {arg}')
             return None
 
+    def _parse_tile_schedule(arg):
+        if not arg:
+            return None
+        schedule = []
+        for i, token in enumerate(arg.split(',')):
+            token = token.strip()
+            if not token or token.lower() == 'none':
+                schedule.append(None)
+            else:
+                schedule.append(_parse_tile(token, f'IDR排程第{i+1}輪'))
+        return schedule
+
     tile_size = _parse_tile(args.tile_size, '主流程')
     idr_tile_size = _parse_tile(args.idr_tile_size, 'IDR')
     refine_tile_size = _parse_tile(args.refine_tile_size, '熱區精修')
+    idr_tile_schedule = _parse_tile_schedule(args.idr_tile_schedule)
+    if idr_tile_schedule is None:
+        if idr_tile_size is not None:
+            idr_tile_schedule = [idr_tile_size]
+        else:
+            idr_tile_schedule = [None, (256, 256), (128, 128)]
+    logger.info(f'IDR分塊排程: {idr_tile_schedule}')
     logger.info('穩定模式: 雙流處理 + 可選增強功能')
     
     # GPU優化器設定
@@ -192,6 +215,7 @@ def main():
         print(f"   DRUNet模型載入成功!")
         print(f"   參數數量: {num_params:,}")
         print(f"   穩定版本: 雙流處理 + Self-Attention {'啟用' if args.enable_attention else '未啟用'}")
+        print(f"   自監督迭代: {'啟用' if args.enable_idr else '未啟用'} | 金字塔式IDR: {'啟用' if args.enable_pyramid_idr else '未啟用'}")
         print(f"   增強功能: {'完整模式' if args.enable_enhanced_features else '標準模式'}")
         print(f"   自監督迭代: {'啟用' if args.enable_idr else '未啟用'}")
         
@@ -306,10 +330,25 @@ def main():
                             )
                     # 自監督式IDR迭代降噪
                     if args.enable_idr and not low_noise:
-                        img_E = adaptive_idr_denoise(
-                            model, img_E, device, noise_level, gpu_optimizer,
-                            tile_size=idr_tile_size,
-                        )
+                        if args.enable_pyramid_idr:
+                            img_E = pyramid_idr_denoise(
+                                model,
+                                img_E,
+                                device,
+                                noise_level,
+                                gpu_optimizer,
+                                levels=args.pyramid_levels,
+                                tile_schedule=idr_tile_schedule,
+                            )
+                        else:
+                            img_E = adaptive_idr_denoise(
+                                model,
+                                img_E,
+                                device,
+                                noise_level,
+                                gpu_optimizer,
+                                tile_schedule=idr_tile_schedule,
+                            )
                     elif args.enable_idr and low_noise:
                         logger.info(f'{img_name} - 噪聲低於閾值，略過IDR迭代')
 
