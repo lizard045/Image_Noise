@@ -80,7 +80,7 @@ def main():
     parser.add_argument('--max_auto_noise', type=float, default=25.0,
                         help='自動估計雜訊的上限值')
     parser.add_argument('--auto_skip_low_noise', action='store_true',
-                        help='噪聲低於閾值時自動跳過IDR與雙邊濾波')
+                        help='噪聲低於閾值時僅執行IDR，略過後處理')
     parser.add_argument('--low_noise_threshold', type=float, default=5.0,
                         help='判定為低噪聲的閾值')
     parser.add_argument('--device', type=str, default='auto')
@@ -89,6 +89,8 @@ def main():
     parser.add_argument('--optimize_attention_params', action='store_true', help='啟用Attention參數自動調優')
     parser.add_argument('--enable_region_adaptive', action='store_true', help='啟用區域自適應處理 (解決去噪不均勻問題)')
     parser.add_argument('--enable_idr', action='store_true', help='啟用自監督式迭代降噪')
+    parser.add_argument('--enable_refine_hotspots', action='store_true', help='啟用殘留噪點熱區精修')
+    parser.add_argument('--enable_bilateral', action='store_true', help='啟用殘差域雙邊濾波')
     parser.add_argument('--enable_pyramid_idr', action='store_true', help='啟用金字塔式 IDR 流程')
     parser.add_argument('--pyramid_levels', type=int, default=2, help='金字塔式 IDR 層數')
     parser.add_argument('--monitor_performance', action='store_true')
@@ -116,12 +118,14 @@ def main():
     logger.info(f'雜訊等級: {args.noise_level if args.noise_level is not None else "自動估計"}')
     logger.info(f'自動雜訊上限: {args.max_auto_noise}')
     if args.auto_skip_low_noise:
-        logger.info(f'低噪聲自動跳過後處理: 閾值 {args.low_noise_threshold}')
+        logger.info(f'低噪聲僅執行IDR: 閾值 {args.low_noise_threshold}')
     logger.info(f'Self-Attention: {"啟用 (修復版)" if args.enable_attention else "停用"}')
     logger.info(f'增強特徵提取: {"啟用" if args.enable_enhanced_features else "停用"}')
     logger.info(f'參數自動調優: {"啟用" if args.optimize_attention_params else "停用"}')
     logger.info(f'區域自適應: {"啟用" if args.enable_region_adaptive else "停用"}')
     logger.info(f'自監督迭代: {"啟用" if args.enable_idr else "停用"}')
+    logger.info(f'熱區精修: {"啟用" if args.enable_refine_hotspots else "停用"}')
+    logger.info(f'殘差雙邊濾波: {"啟用" if args.enable_bilateral else "停用"}')
     logger.info(f'金字塔式IDR: {"啟用" if args.enable_pyramid_idr else "停用"}')
     logger.info(f'通道縮放比例: {args.channel_scale}')
     logger.info(f'UNet區塊數: {args.num_blocks}')
@@ -218,6 +222,8 @@ def main():
         print(f"   自監督迭代: {'啟用' if args.enable_idr else '未啟用'} | 金字塔式IDR: {'啟用' if args.enable_pyramid_idr else '未啟用'}")
         print(f"   增強功能: {'完整模式' if args.enable_enhanced_features else '標準模式'}")
         print(f"   自監督迭代: {'啟用' if args.enable_idr else '未啟用'}")
+        print(f"   熱區精修: {'啟用' if args.enable_refine_hotspots else '未啟用'}")
+        print(f"   殘差雙邊濾波: {'啟用' if args.enable_bilateral else '未啟用'}")
         
         # Attention參數調優 (如果啟用)
         if (args.optimize_attention_params and args.enable_attention and 
@@ -303,7 +309,7 @@ def main():
                     print(f"    使用雜訊等級: {noise_level:.2f}{' (自動估計)' if args.noise_level is None else ''}")
                     low_noise = args.auto_skip_low_noise and noise_level <= args.low_noise_threshold
                     if low_noise:
-                        print(f"    噪聲低於閾值({args.low_noise_threshold}), 跳過IDR與後續濾波")
+                        print(f"    噪聲低於閾值({args.low_noise_threshold}), 僅執行IDR，略過後處理")
 
                     # 根據圖片大小選擇處理方式
                     if args.single_stream:
@@ -329,7 +335,7 @@ def main():
                                 tile_size=tile_size,
                             )
                     # 自監督式IDR迭代降噪
-                    if args.enable_idr and not low_noise:
+                    if args.enable_idr or low_noise:
                         if args.enable_pyramid_idr:
                             img_E = pyramid_idr_denoise(
                                 model,
@@ -349,24 +355,22 @@ def main():
                                 gpu_optimizer,
                                 tile_schedule=idr_tile_schedule,
                             )
-                    elif args.enable_idr and low_noise:
-                        logger.info(f'{img_name} - 噪聲低於閾值，略過IDR迭代')
 
                     if not low_noise:
-                        # 二次降噪：殘留噪點熱區精修
-                        img_E = _refine_residual_noise_hotspots(
-                            model,
-                            img_L,
-                            img_E,
-                            device,
-                            args.noise_level,
-                            gpu_optimizer,
-                            enable_attention=args.enable_attention,
-                            enable_region_adaptive=args.enable_region_adaptive,
-                            tile_size=refine_tile_size,
-                        )
-                        # 二次降噪：殘差域雙邊濾波
-                        img_E = _residual_bilateral_denoise(img_L, img_E)
+                        if args.enable_refine_hotspots:
+                            img_E = _refine_residual_noise_hotspots(
+                                model,
+                                img_L,
+                                img_E,
+                                device,
+                                args.noise_level,
+                                gpu_optimizer,
+                                enable_attention=args.enable_attention,
+                                enable_region_adaptive=args.enable_region_adaptive,
+                                tile_size=refine_tile_size,
+                            )
+                        if args.enable_bilateral:
+                            img_E = _residual_bilateral_denoise(img_L, img_E)
                     else:
                         logger.info(f'{img_name} - 噪聲低於閾值，略過熱區精修與雙邊濾波')
 

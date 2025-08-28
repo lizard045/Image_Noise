@@ -87,13 +87,22 @@ def _residual_bilateral_denoise(original_img, current_result, sigma_color=30, si
     norm_residual = residual_gray.astype(np.float32)
     norm_residual = norm_residual / (np.max(norm_residual) + 1e-6)
     norm_residual = cv2.GaussianBlur(norm_residual, (0, 0), 1.5)
-    # 適度壓縮高強度殘差的權重以保留細節
+    # 適度壓縮高強度殘差的權重以保留細節，並保留形狀 (H, W, 1)
     weight = norm_residual / (norm_residual + 0.2)
     weight = np.clip(weight, 0.0, 1.0)[..., np.newaxis]
-    filtered = cv2.bilateralFilter(current_result, d=5, sigmaColor=sigma_color, sigmaSpace=sigma_space)
+
+    filtered = cv2.bilateralFilter(
+        current_result, d=5, sigmaColor=sigma_color, sigmaSpace=sigma_space
+    )
+
+    # 亮區不進行雙邊濾波
     bright_mask = cv2.cvtColor(original_img, cv2.COLOR_RGB2GRAY) > 235
-    weight[bright_mask[..., np.newaxis]] = 0
-    # 適度壓縮高強度殘差的權重以保留細節
-    weight = norm_residual[..., np.newaxis]
-    blended = weight * filtered.astype(np.float32) + (1 - weight) * current_result.astype(np.float32)
+    weight[bright_mask] = 0
+    weight = np.clip(weight, 0.0, 1.0)
+
+    blended = (
+        weight * filtered.astype(np.float32)
+        + (1 - weight) * current_result.astype(np.float32)
+    )
     return np.clip(blended, 0, 255).astype(np.uint8)
+
