@@ -23,6 +23,7 @@ from gpu_optimizer import GPUOptimizer
 from dual_stream import stable_dual_stream_processing, tile_process_stable, fallback_single_processing
 from residual_refinement import _refine_residual_noise_hotspots, _residual_bilateral_denoise
 from self_supervised_idr import adaptive_idr_denoise, pyramid_idr_denoise
+from models.temporal_refiner import TemporalRefiner
 
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -102,6 +103,7 @@ def main():
     parser.add_argument('--idr_tile_size', type=str, default=None, help='IDR 迭代分塊尺寸')
     parser.add_argument('--idr_tile_schedule', type=str, default=None, help='IDR 分塊尺寸排程，例如 "None,256,128"')
     parser.add_argument('--refine_tile_size', type=str, default=None, help='殘留噪點精修分塊尺寸')
+    parser.add_argument('--enable_temporal_refiner', action='store_true', help='啟用跨幀時域精修')
     args = parser.parse_args()
 
     # 建立輸出目錄和日誌
@@ -130,6 +132,7 @@ def main():
     logger.info(f'通道縮放比例: {args.channel_scale}')
     logger.info(f'UNet區塊數: {args.num_blocks}')
     logger.info(f'強制單流: {"啟用" if args.single_stream else "停用"}')
+    logger.info(f'時域精修: {"啟用" if args.enable_temporal_refiner else "停用"}')
 
     def _parse_tile(arg, name):
         if not arg:
@@ -182,8 +185,9 @@ def main():
     if args.device != 'auto':
         device = torch.device(args.device)
         print(f" 強制使用指定設備: {device}")
-    
+
     logger.info(f'使用設備: {device}')
+    temporal_refiner = TemporalRefiner(device=device) if args.enable_temporal_refiner else None
     
     # 檢查路徑
     if not os.path.exists(args.drunet_model_path):
@@ -224,6 +228,7 @@ def main():
         print(f"   自監督迭代: {'啟用' if args.enable_idr else '未啟用'}")
         print(f"   熱區精修: {'啟用' if args.enable_refine_hotspots else '未啟用'}")
         print(f"   殘差雙邊濾波: {'啟用' if args.enable_bilateral else '未啟用'}")
+        print(f"   時域精修: {'啟用' if args.enable_temporal_refiner else '未啟用'}")
         
         # Attention參數調優 (如果啟用)
         if (args.optimize_attention_params and args.enable_attention and 
@@ -285,6 +290,7 @@ def main():
     processed_count = 0
     failed_count = 0
     start_time = time.time()
+    frame_buffer = []
     with torch.no_grad():
         for batch_idx in range(num_batches):
             batch_start = batch_idx * args.batch_size
@@ -374,6 +380,13 @@ def main():
                     else:
                         logger.info(f'{img_name} - 噪聲低於閾值，略過熱區精修與雙邊濾波')
 
+                    if args.enable_temporal_refiner:
+                        frame_buffer.append(img_E)
+                        if len(frame_buffer) == 3:
+                            img_E = temporal_refiner(frame_buffer)
+                            frame_buffer[-1] = img_E
+                            frame_buffer.pop(0)
+
                     # 確保輸出影像尺寸正確
                     if img_E.shape != original_shape:
                         logger.warning(f'{img_name} - 輸出尺寸不匹配: {img_E.shape} vs {original_shape}')
@@ -422,6 +435,7 @@ def main():
     print(f" ⏱  處理時間: {total_time:.2f} 秒 (平均 {avg_time_per_image:.2f} 秒/張)")
     print(f"  處理速度: {processed_count/total_time:.2f} 張/秒")
     print(f"  增強特色: 雙流處理 + 自適應參數 + 多尺度邊緣 + Self-Attention {'啟用' if args.enable_attention else '未啟用'}")
+    print(f"  時域精修: {'啟用' if args.enable_temporal_refiner else '未啟用'}")
     print(f"  結果位置: {args.output_dir}")
     
     if processed_count > 0:
@@ -435,6 +449,7 @@ def main():
         print(f"   •  特徵提取: {'結構張量+LBP紋理+小波變換' if args.enable_enhanced_features else '傳統Laplacian邊緣'}")
         print(f"   •  記憶體優化: 頻繁清理，避免記憶體累積")
         print(f"   •  詳細統計: 每張圖片的處理參數和統計資訊")
+        print(f"   •  時域精修: {'光流對齊後平滑多幀結果' if args.enable_temporal_refiner else '未啟用'}")
         
         if args.enable_enhanced_features:
             print(f"\n 增強功能詳情:")
