@@ -630,6 +630,7 @@ def run_attention_optimization_example():
     from enhanced_feature_extraction import RobustSelfAttention
     
     attention_module = RobustSelfAttention(channels=3)
+    attention_module.eval()
     
     # 創建優化器
     optimizer = AttentionParameterOptimizer(attention_module)

@@ -61,6 +61,7 @@ class GPUOptimizer:
             if enable_attention and self.gpu_info['memory_total'] >= 6.0:
                 try:
                     self.attention_module = RobustSelfAttention(3).to(self.device)
+                    self.attention_module.eval()
                     print(f"    Self-Attention模組: 已啟用 (修復版)")
 
                     # 初始化attention調優器 (如果啟用增強功能)
